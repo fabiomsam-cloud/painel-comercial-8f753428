@@ -740,7 +740,7 @@
   };
   const tabela = (nome, head, rows, opts = {}) => {
     CSVS[nome] = {head, rows: rows.map(r => r.map(c => typeof c === "object" && c ? c.raw : c))};
-    const cell = (c, i) => typeof c === "object" && c ? `<td class="${c.cls || ""}${i === 0 ? " rowlabel" : ""}">${c.html}</td>` : `<td class="${i === 0 ? "rowlabel" : "num"}">${esc(c)}</td>`;
+    const cell = (c, i) => typeof c === "object" && c ? `<td class="${c.cls || ""}${i === 0 ? " rowlabel" : ""}">${c.html}</td>` : `<td class="${i === 0 ? "rowlabel" : "num"}">${typeof c === "number" ? fmtN(c) : esc(c)}</td>`;
     let h = `<table><thead><tr>${head.map((x, i) => `<th${i === 0 ? ' class="rowlabel"' : ""}>${esc(x)}</th>`).join("")}</tr></thead><tbody>`;
     h += rows.map(r => `<tr>${r.map(cell).join("")}</tr>`).join("");
     if (opts.total) h += `<tr class="total">${opts.total.map(cell).join("")}</tr>`;
