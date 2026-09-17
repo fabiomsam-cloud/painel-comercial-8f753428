@@ -408,7 +408,7 @@
     const custom = state.periodo === "custom";
     $("f-ini").style.display = $("f-fim").style.display = custom ? "" : "none";
     const sup = state.superior === "1" ? " · Só leads com escolaridade superior completa ou pós (pesquisa → eventos de campanha → cadastro); leads sem escolaridade conhecida ficam de fora." : "";
-    $("filter-desc").textContent = "Período " + dmy(j.ini) + " – " + dmy(j.fim) + " · " + FILTER_LABEL[state.modo] + sup;
+    $("filter-desc").textContent = "Período " + dmy(j.ini) + " – " + dmy(j.fim) + " · " + FILTER_LABEL[state.modo] + sup + (state.contest ? " · Concurso " + cLabel(state.contest) + ": leads pelo vínculo lead→concurso; vendas pelo de-para produto→concurso (produtos sem concurso mapeado ficam de fora)." : "");
   }
 
   function renderKpis(){
