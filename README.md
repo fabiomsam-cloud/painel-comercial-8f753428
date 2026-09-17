@@ -31,10 +31,12 @@ index.html ── POST ?k=&resource=metas {mes, chave, valor, por} ──▶ ups
 ## Fases
 1. ✅ Fundação (16/09/2026): repo, tabelas de config, edges, navegação, filtros, KPIs, ritmo por categoria, metas compartilhadas.
 2. ✅ Receita (16/09): seções 4, 5, 6 (matriculados; inscritos/engajados nas fases 3–4), 7B, 8, 10; CSV em toda tabela; cupons 90d (`fn_comercial_cupons_90d`); seção 5 usa `sales.attribution` da Anne quando existe.
-3. Demanda — 1.1, 1.2, 1.3, filtro ensino superior. 4. Engajamento + Anne — 2, 3, ref. A.
+3. ✅ Demanda (16/09): `fn_comercial_leads` (1 linha por lead: rótulo 1.1, ação 1.2, concursos, escolaridade, sinais de engajamento do Data Core, matriculado) + `fn_comercial_meta_spend`; tela Demanda (1.1 com metas/MoM/gráfico da mesma query, 1.2 com alerta VSL vivo, 1.3), KPI de inscritos, filtro ensino superior (pesquisa → campaign_events → cadastro; só completo/pós), seletor de concurso, seção 6 com inscritos e engajados parciais.
+4. Engajamento + Anne — 2, 3, ref. A.
 5. Time comercial + financeiro — 9, ref. B, 11. 6. Acabamento — CSV, config de-paras, card na Central.
 
 ## Validação (janela fechada 01–15/09/2026 × 2025)
 Total 562 faturas / R$ 178.014,19 · 2025: 419 / R$ 298.401,52 · Elite/Upsell/Recorrente nova 132/1/39 e parcela 261/44/21 (iguais ao protótipo).
 Seção 4: 97/84/20/17/8/2/1 = 229 (exato). Seção 5: Anne IA 57 · Vendedor 49 · Marketing 47 · CS 6 · Blindado 3 · Disparo 1 (exato); os códigos `plataforma`/`checkout` foram para Site (protótipo somava em Venda Direta) — ajustável em `comercial_vendedor_codigo`. 7B: produto a produto igual ao protótipo.
+Inscritos 01–15/09 = 1.593 (exato). 1.1: @souconcurseiro 75 · @deltafabio 16 · pago 180 · blindado 146 · YouTube 33 (protótipo 75/16/179/149/30). Engajados Data Core 753 (protótipo 754).
 Vendas novas 220 vs 221 do protótipo: a diferença é 1 fatura `invoice_type = 'Renovação'` (R$ 7,05) que a regra do briefing exclui.
