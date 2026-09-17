@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Inteligência Comercial · Grupo SOU</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root{
+    --bg:#F1F2F5; --surface:#FFFFFF; --surface-2:#E9EBF0; --surface-3:#DEE1E8;
+    --border:#D6D9E1; --ink:#15181F; --ink-2:#414759; --ink-muted:#7B8299;
+    --accent:#233B73; --accent-ink:#FFFFFF; --accent-soft:#E4E9F5;
+    --gold:#8C6A1F; --gold-soft:#F3E7CB;
+    --good:#1C7A4E; --good-soft:#DFF2E7;
+    --warning:#A8630C; --warning-soft:#FAE7CE;
+    --critical:#AA3333; --critical-soft:#F8E0E0;
+    --shadow: 0 1px 2px rgba(21,24,31,.05), 0 8px 22px -10px rgba(21,24,31,.14);
+    --radius:12px; --side:236px;
+  }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --bg:#0D0F14; --surface:#161922; --surface-2:#1D212C; --surface-3:#262B38;
+    --border:#2B303E; --ink:#EDEFF5; --ink-2:#BFC4D4; --ink-muted:#828AA0;
+    --accent:#7D9AE0; --accent-ink:#0D0F14; --accent-soft:#1C2946;
+    --gold:#D3AF64; --gold-soft:#2F2712; --good:#57C295; --good-soft:#0F2A1F;
+    --warning:#E2A254; --warning-soft:#2E2110; --critical:#E27E7E; --critical-soft:#301616;
+    --shadow: 0 1px 2px rgba(0,0,0,.35), 0 10px 30px -12px rgba(0,0,0,.55); } }
+  :root[data-theme="dark"]{
+    --bg:#0D0F14; --surface:#161922; --surface-2:#1D212C; --surface-3:#262B38;
+    --border:#2B303E; --ink:#EDEFF5; --ink-2:#BFC4D4; --ink-muted:#828AA0;
+    --accent:#7D9AE0; --accent-ink:#0D0F14; --accent-soft:#1C2946;
+    --gold:#D3AF64; --gold-soft:#2F2712; --good:#57C295; --good-soft:#0F2A1F;
+    --warning:#E2A254; --warning-soft:#2E2110; --critical:#E27E7E; --critical-soft:#301616;
+    --shadow: 0 1px 2px rgba(0,0,0,.35), 0 10px 30px -12px rgba(0,0,0,.55); }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;font-size:14px;line-height:1.45;min-height:100vh}
+  h1,h2,h3{font-family:"Fraunces",Georgia,serif;text-wrap:balance;color:var(--ink)}
+  .num,.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+  code{font-family:"IBM Plex Mono",monospace;font-size:.92em;background:var(--surface-2);padding:1px 5px;border-radius:4px}
+  a{color:var(--accent)}
+
+  /* ---- shell: sidebar + topbar ---- */
+  .shell{display:grid;grid-template-columns:var(--side) 1fr;min-height:100vh}
+  aside{background:var(--surface);border-right:1px solid var(--border);padding:18px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:6px}
+  .brand{padding:4px 8px 14px;border-bottom:2px solid var(--ink);margin-bottom:8px}
+  .brand .eyebrow{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .brand h1{font-size:19px;font-weight:700;line-height:1.15;margin-top:2px}
+  .nav a{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;color:var(--ink-2);text-decoration:none;font-weight:600;font-size:13.5px}
+  .nav a:hover{background:var(--surface-2)}
+  .nav a.on{background:var(--accent);color:var(--accent-ink)}
+  .nav a .ic{width:20px;text-align:center}
+  .nav a .tag{margin-left:auto;font-family:"IBM Plex Mono";font-size:9.5px;padding:1px 6px;border-radius:99px;background:var(--surface-3);color:var(--ink-muted)}
+  .nav a.on .tag{background:rgba(255,255,255,.2);color:var(--accent-ink)}
+  aside .foot{margin-top:auto;font-size:11px;color:var(--ink-muted);line-height:1.6;padding:8px}
+  main{padding:18px 26px 70px;max-width:1280px;width:100%}
+
+  .topbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;box-shadow:var(--shadow);position:sticky;top:10px;z-index:5}
+  .flabel{font-size:11px;color:var(--ink-muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-right:2px}
+  .seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .seg button{font-family:inherit;font-size:12.5px;font-weight:600;padding:6px 12px;border:0;background:var(--surface);color:var(--ink-2);cursor:pointer;border-right:1px solid var(--border)}
+  .seg button:last-child{border-right:0}
+  .seg button:hover{background:var(--surface-2)}
+  .seg button.on{background:var(--accent);color:var(--accent-ink)}
+  .grp{display:flex;align-items:center;gap:6px}
+  .topbar input[type=date],.topbar select{font-family:"IBM Plex Mono";font-size:12px;border:1px solid var(--border);border-radius:7px;padding:5px 7px;background:var(--surface);color:var(--ink)}
+  .topbar .right{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--ink-muted)}
+  .btn{font-family:inherit;font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--surface);color:var(--ink-2);border-radius:8px;padding:6px 11px;cursor:pointer}
+  .btn:hover{background:var(--surface-2)}
+  .filter-desc{width:100%;font-size:12px;color:var(--ink-muted)}
+
+  /* ---- páginas / cards ---- */
+  .page{display:none;flex-direction:column;gap:18px;margin-top:18px}
+  .page.on{display:flex}
+  .page-head h2{font-size:24px;font-weight:600}
+  .page-head p{color:var(--ink-muted);font-size:12.5px;margin-top:3px;max-width:90ch}
+  section{display:flex;flex-direction:column;gap:12px}
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:8px}
+  .section-num{font-family:"IBM Plex Mono";font-size:12px;color:var(--accent);font-weight:600;letter-spacing:.04em}
+  .section-head h2{font-size:18px;font-weight:600;display:inline}
+  .section-sub{color:var(--ink-muted);font-size:12px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow)}
+  .card h3{font-size:14px;font-weight:600;font-family:"IBM Plex Sans"}
+  .grid-2{display:grid;grid-template-columns:1.3fr 1fr;gap:14px}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media (max-width:900px){.grid-2,.grid-3{grid-template-columns:1fr}}
+  .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+  .kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow)}
+  .kpi .l{font-size:11.5px;color:var(--ink-muted);font-weight:500}
+  .kpi .v{font-family:"IBM Plex Mono";font-size:23px;font-weight:600;margin-top:3px}
+  .kpi .s{font-size:11.5px;margin-top:3px}
+  .kpi .s2{font-size:11px;margin-top:1px;color:var(--ink-muted)}
+  .good{color:var(--good)} .warn{color:var(--warning)} .crit{color:var(--critical)} .muted{color:var(--ink-muted)}
+  .finding{border-left:3px solid var(--gold);background:var(--gold-soft);border-radius:0 var(--radius) var(--radius) 0;padding:12px 16px;font-size:12.8px;color:var(--ink-2);line-height:1.55}
+  .finding.crit{border-left-color:var(--critical);background:var(--critical-soft)}
+  .finding b{color:var(--ink)}
+  .note{font-size:12px;color:var(--ink-muted);line-height:1.55}
+  .note b{color:var(--ink-2)}
+  .pill{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:700;white-space:nowrap}
+  .pill.good{background:var(--good-soft);color:var(--good)} .pill.warn{background:var(--warning-soft);color:var(--warning)}
+  .pill.crit{background:var(--critical-soft);color:var(--critical)} .pill.neutral{background:var(--surface-2);color:var(--ink-2)}
+  .pill.build{background:var(--surface-3);color:var(--ink-muted);border:1px dashed var(--border)}
+  table{width:100%;border-collapse:collapse;font-size:12.8px}
+  th{text-align:right;font-size:10.5px;letter-spacing:.03em;text-transform:uppercase;color:var(--ink-muted);font-weight:700;padding:7px 9px;border-bottom:2px solid var(--ink);white-space:nowrap}
+  th:first-child,td:first-child{text-align:left}
+  td{padding:8px 9px;border-bottom:1px solid var(--border);color:var(--ink-2);text-align:right;font-family:"IBM Plex Mono";font-variant-numeric:tabular-nums}
+  tr.total td{font-weight:700;color:var(--ink);border-top:2px solid var(--ink);border-bottom:none}
+  tr:hover td{background:var(--surface-2)}
+  .rowlabel{font-family:"IBM Plex Sans";font-weight:500;color:var(--ink);text-align:left!important}
+  .tablewrap{overflow-x:auto}
+  .meta-input{font-family:"IBM Plex Mono";font-size:12.5px;text-align:right;width:96px;border:1px solid var(--gold);border-radius:6px;padding:4px 7px;background:var(--gold-soft);color:var(--ink)}
+  .meta-input:focus{outline:2px solid var(--accent);outline-offset:1px;background:var(--surface)}
+  .pending-card{background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius);padding:18px 20px;color:var(--ink-muted);font-size:13px;line-height:1.6}
+  .pending-card b{color:var(--ink-2)}
+  .err{display:none;background:var(--critical-soft);color:var(--critical);border:1px solid var(--critical);border-radius:var(--radius);padding:12px 16px;font-size:13px;margin-top:14px}
+  .avg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .avg-cell{background:var(--surface);padding:10px 12px;text-align:center}
+  .avg-cell .k{font-size:10px;color:var(--ink-muted);text-transform:uppercase;letter-spacing:.03em}
+  .avg-cell .v{font-family:"IBM Plex Mono";font-size:17px;font-weight:600;margin-top:2px}
+  .aviso{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--border);border-radius:9px;background:var(--surface);font-size:12.5px}
+  .aviso .ic{font-size:16px}
+  .avisos{display:flex;flex-direction:column;gap:8px}
+
+  @media (max-width:860px){
+    .shell{grid-template-columns:1fr}
+    aside{position:sticky;height:auto;flex-direction:row;align-items:center;gap:4px;padding:8px 10px;overflow-x:auto;border-right:0;border-bottom:1px solid var(--border)}
+    .brand{border:0;padding:0 10px 0 0;margin:0;white-space:nowrap} .brand h1{font-size:15px} .brand .eyebrow{display:none}
+    .nav{display:flex;gap:4px} .nav a{padding:7px 9px;white-space:nowrap;font-size:12.5px} .nav a .tag{display:none}
+    aside .foot{display:none}
+    main{padding:12px 14px 60px}
+    .topbar{position:static}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside>
+    <div class="brand">
+      <div class="eyebrow">Grupo SOU · Concurseiro e Vou Passar</div>
+      <h1>Inteligência Comercial</h1>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="foot">Fontes: <span class="mono">sou-data-core</span> · <span class="mono">anne-vendedora</span><br>Dias em Manaus (−04). Receita = líquida.<br><span id="upd">carregando…</span></div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <div class="grp"><span class="flabel">Período</span>
+        <div class="seg" id="seg-periodo">
+          <button data-p="mes">Mês atual</button><button data-p="mes-1">Mês anterior</button><button data-p="7d">7 dias</button><button data-p="30d">30 dias</button><button data-p="custom">Personalizado</button>
+        </div>
+        <input type="date" id="f-ini" title="início"> <input type="date" id="f-fim" title="fim">
+      </div>
+      <div class="grp"><span class="flabel">Receita</span>
+        <div class="seg" id="seg-modo"><button data-m="total">Total</button><button data-m="nova">Venda Nova</button><button data-m="parcela">Parcela</button></div>
+      </div>
+      <div class="grp"><span class="flabel">Escolaridade</span>
+        <div class="seg" id="seg-sup"><button data-s="0">Todos</button><button data-s="1">Só ensino superior</button></div>
+      </div>
+      <div class="grp"><span class="flabel">Concurso</span>
+        <select id="f-contest"><option value="">Todos</option></select>
+      </div>
+      <div class="right"><button class="btn" id="btn-theme" title="tema claro/escuro">◐</button><button class="btn" id="btn-reload">⟳ Atualizar</button></div>
+      <div class="filter-desc" id="filter-desc"></div>
+    </div>
+    <div class="err" id="err"></div>
+
+    <!-- ===== VISÃO ===== -->
+    <div class="page" id="p-visao">
+      <div class="page-head"><h2>Visão executiva</h2><p>Resumo do período com comparativo no <b>mesmo recorte de dias</b> do ano anterior (YoY) e do mês anterior (MoM). Os três primeiros indicadores mudam conforme o filtro Total / Venda Nova / Parcela.</p></div>
+      <div class="kpi-row" id="kpis"></div>
+      <div class="finding" id="finding-mes"></div>
+      <section>
+        <div class="section-head"><div><span class="section-num">AVISOS</span> <h2>Estado do dado</h2></div><span class="section-sub">limitações conhecidas — aparecem ao lado de cada número nas telas</span></div>
+        <div class="avisos" id="avisos"></div>
+      </section>
+    </div>
+
+    <!-- ===== DEMANDA ===== -->
+    <div class="page" id="p-demanda">
+      <div class="page-head"><h2>Geração de demanda</h2><p>Inscritos por canal de marketing (1.1), por evento/ação e concurso (1.2) e por produto (1.3).</p></div>
+      <div class="pending-card" id="pend-demanda"></div>
+    </div>
+
+    <!-- ===== ENGAJAMENTO ===== -->
+    <div class="page" id="p-engajamento">
+      <div class="page-head"><h2>Engajamento</h2><p>Engajados e ativos por produto (2), engajados não matriculados (3) e segmentação por estrela (ref. A).</p></div>
+      <div class="pending-card" id="pend-engajamento"></div>
+    </div>
+
+    <!-- ===== RECEITA ===== -->
+    <div class="page" id="p-receita">
+      <div class="page-head"><h2>Geração de receita</h2><p>Matrículas por canal de entrada (4) e de venda (5), funil geral (6), ritmo do mês (7), evolução diária (8) e cupons (10). Todas respeitam o filtro Total / Venda Nova / Parcela.</p></div>
+      <section id="s7">
+        <div class="section-head"><div><span class="section-num">07</span> <h2>Ritmo do mês — por categoria</h2></div><span class="section-sub">metas compartilhadas · realizado no período · YoY no mesmo recorte</span></div>
+        <div class="card"><div class="tablewrap" id="tab-categorias"></div>
+          <p class="note" style="margin-top:10px" id="nota-geral"></p></div>
+        <div class="grid-3" id="avg-cards"></div>
+        <p class="note">Respeita o filtro Total / Venda Nova / Parcela. Sem meta preenchida, "Média/dia necessária" fica em branco. Metas são compartilhadas (gravadas no banco de configuração do painel), não no navegador.</p>
+      </section>
+      <div class="pending-card" id="pend-receita"></div>
+    </div>
+
+    <!-- ===== COMERCIAL ===== -->
+    <div class="page" id="p-comercial">
+      <div class="page-head"><h2>Time comercial</h2><p>Produtividade do time humano (9A), leads da Anne fora do pipeline (9B), quem assume/engaja/converte (9C) e motivos de perda (ref. B).</p></div>
+      <div class="kpi-row" id="kpis-comercial"></div>
+      <div class="pending-card" id="pend-comercial"></div>
+    </div>
+
+    <!-- ===== FINANCEIRO ===== -->
+    <div class="page" id="p-financeiro">
+      <div class="page-head"><h2>Financeiro</h2><p>Gasto Meta Ads, CAC (piso), ROAS, CPL e resultado dos disparos (11).</p></div>
+      <div class="pending-card" id="pend-financeiro"></div>
+    </div>
+
+    <!-- ===== CONFIG ===== -->
+    <div class="page" id="p-config">
+      <div class="page-head"><h2>Configuração</h2><p>Metas do mês (compartilhadas com todo o time), de-para de produtos e glossário das definições usadas no painel.</p></div>
+      <section>
+        <div class="section-head"><div><span class="section-num">METAS</span> <h2>Metas do mês</h2></div><span class="section-sub" id="metas-mes"></span></div>
+        <div class="grid-2">
+          <div class="card"><h3>Receita por categoria (seção 7)</h3><div class="tablewrap" style="margin-top:8px" id="metas-receita"></div></div>
+          <div class="card"><h3>Leads por canal de marketing (seção 1.1)</h3><div class="tablewrap" style="margin-top:8px" id="metas-leads"></div></div>
+        </div>
+        <p class="note" id="metas-nota"></p>
+      </section>
+      <section>
+        <div class="section-head"><div><span class="section-num">GLOSSÁRIO</span> <h2>Definições em uso</h2></div></div>
+        <div class="card note" style="line-height:1.7">
+          <b>Venda nova</b> = fatura Hubla com <code>original_invoice_id</code> vazio, 1ª parcela (<code>smart_installment_current</code> nula ou 1), sem reembolso e <code>invoice_type = 'Compra'</code> (renovação de assinatura não é venda nova). Tudo o mais é <b>parcela</b>: receita real, mas não negócio novo.<br>
+          <b>Receita</b> = <code>net_value</code> (líquida). Ticket médio = receita ÷ faturas do filtro.<br>
+          <b>Categoria de produto</b>: derivada do nome (DIAMANTE → Upsell · ELITE → Mentoria Elite · PlayPassei / Sou Questões / Pós-graduação → Recorrente · resto → Outros) e materializada por <code>product_hubla_id</code> na tabela de configuração <code>comercial_produto_categoria</code>, editável. Produtos novos entram como "não validados" até alguém confirmar.<br>
+          <b>Dias</b> sempre em calendário de Manaus (−04). Comparativos YoY/MoM usam o mesmo recorte de dias (ex.: 01–16/09/2026 × 01–16/09/2025).
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+(function(){
+  /* ================= CONFIG ================= */
+  const API = "https://dqpxugdhlgafvddavzzp.supabase.co/functions/v1/dashboard-comercial";
+  const K = new URLSearchParams(location.search).get("k") || "";
+  const PAGES = [
+    {id:"visao", label:"Visão executiva", ic:"🏠"},
+    {id:"demanda", label:"Demanda", ic:"📥", tag:"fase 3"},
+    {id:"engajamento", label:"Engajamento", ic:"🔥", tag:"fase 4"},
+    {id:"receita", label:"Receita", ic:"💰", tag:"fase 2"},
+    {id:"comercial", label:"Time comercial", ic:"☎️", tag:"fase 5"},
+    {id:"financeiro", label:"Financeiro", ic:"📊", tag:"fase 5"},
+    {id:"config", label:"Configuração", ic:"⚙️"},
+  ];
+  const CATS = [["elite","Mentoria Elite"],["upsell","Upsell (Elite Diamante)"],["recorrente","Recorrente"]];
+  const METAS_LEADS = [["ig_delta","Instagram · @deltafabio"],["ig_scv","Instagram · @souconcurseiro"],["playpassei","Instagram/Site · @playpassei"],["yt_scv","YouTube · Sou Concurseiro"],["yt_ef","YouTube · Elite Federal"],["blindado","Site · checkout blindado"],["blog","Site · blog"],["pago","Meta Ads (Feed + Stories + Reels)"]];
+  const FILTER_LABEL = {
+    total:"Total = venda nova + parcela de assinaturas já existentes.",
+    nova:"Venda Nova = primeira cobrança, sem assinatura anterior. É a métrica correta para medir novos negócios.",
+    parcela:"Parcela = 2ª cobrança em diante de assinaturas/parcelamentos já vendidos — receita real, mas não é venda nova."
+  };
+
+  /* ================= HELPERS ================= */
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const fmtR = v => "R$ " + Math.round(v || 0).toLocaleString("pt-BR");
+  const fmtR2 = v => "R$ " + (v || 0).toLocaleString("pt-BR", {minimumFractionDigits:2, maximumFractionDigits:2});
+  const fmtN = v => (v || 0).toLocaleString("pt-BR");
+  const fmtPct = v => (v >= 0 ? "+" : "-") + Math.abs(v).toFixed(1).replace(".", ",") + "%";
+  const fmtDif = v => (v >= 0 ? "+" : "-") + "R$ " + Math.round(Math.abs(v)).toLocaleString("pt-BR");
+  const cls = v => v > 0 ? "good" : (v < 0 ? "crit" : "muted");
+  const statusFor = pct => pct >= 0.9 ? {cls:"good", label:"No alvo"} : pct >= 0.6 ? {cls:"warn", label:"Atenção"} : {cls:"crit", label:"Abaixo"};
+  const hojeManaus = () => new Date(Date.now() - 4*3600e3).toISOString().slice(0,10);
+  const addDays = (s, n) => new Date(Date.parse(s + "T12:00:00Z") + n*86400e3).toISOString().slice(0,10);
+  const dmy = s => s ? s.slice(8,10) + "/" + s.slice(5,7) + "/" + s.slice(0,4) : "—";
+  const dm = s => s ? s.slice(8,10) + "/" + s.slice(5,7) : "—";
+  const diasEntre = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 86400e3) + 1;
+  const ultimoDiaMes = s => { const [y,m] = s.split("-").map(Number); return new Date(Date.UTC(y, m, 0)).toISOString().slice(0,10); };
+
+  /* ================= ESTADO ================= */
+  let RAW = null;
+  let state = {periodo:"mes", ini:null, fim:null, modo:"total", superior:"0", contest:""};
+  try { const s = JSON.parse(localStorage.getItem("com_filtros") || "null"); if (s && s.modo) state = Object.assign(state, s); } catch(e){}
+  function saveState(){ try { localStorage.setItem("com_filtros", JSON.stringify(state)); } catch(e){} }
+  function janela(){
+    const hoje = hojeManaus();
+    if (state.periodo === "mes") return {ini: hoje.slice(0,8) + "01", fim: hoje};
+    if (state.periodo === "mes-1"){ const ini = addDays(hoje.slice(0,8) + "01", -1).slice(0,8) + "01"; return {ini, fim: ultimoDiaMes(ini)}; }
+    if (state.periodo === "7d") return {ini: addDays(hoje, -6), fim: hoje};
+    if (state.periodo === "30d") return {ini: addDays(hoje, -29), fim: hoje};
+    return {ini: state.ini || hoje.slice(0,8) + "01", fim: state.fim || hoje};
+  }
+
+  /* ================= DADOS ================= */
+  async function load(){
+    const j = janela();
+    const qs = new URLSearchParams({k:K, ini:j.ini, fim:j.fim, superior:state.superior, contest:state.contest});
+    try{
+      $("upd").textContent = "atualizando…";
+      const r = await fetch(API + "?" + qs.toString());
+      const d = await r.json();
+      if (d.error) throw new Error(d.error);
+      RAW = d;
+      $("err").style.display = "none";
+      $("upd").textContent = "atualizado " + new Date(d.generated_at).toLocaleString("pt-BR", {timeZone:"America/Manaus", day:"2-digit", month:"2-digit", hour:"2-digit", minute:"2-digit"}) + " (Manaus)";
+      renderAll();
+    }catch(e){
+      $("err").style.display = "block";
+      $("err").textContent = "Falha ao carregar os dados: " + e.message + (K ? "" : " — confira o token ?k= na URL.");
+      $("upd").textContent = "erro ao carregar";
+    }
+  }
+
+  // agrega faturas do filtro Total/Nova/Parcela por categoria
+  function agregar(rows){
+    const out = {elite:{qty:0,rev:0}, upsell:{qty:0,rev:0}, recorrente:{qty:0,rev:0}, outros:{qty:0,rev:0}, geral:{qty:0,rev:0}};
+    for (const r of rows || []){
+      if (state.modo !== "total" && r.tipo_fatura !== state.modo) continue;
+      const c = out[r.categoria] || out.outros; const v = Number(r.net_value) || 0;
+      c.qty++; c.rev += v; out.geral.qty++; out.geral.rev += v;
+    }
+    return out;
+  }
+  function metasMes(){
+    const m = {}; const mes = RAW.filtros.ini.slice(0,8) + "01";
+    for (const r of RAW.metas || []) if (r.mes === mes) m[r.chave] = Number(r.valor) || 0;
+    return m;
+  }
+
+  /* ================= RENDER ================= */
+  function renderAll(){
+    renderFiltros();
+    try { renderKpis(); } catch(e){ $("kpis").innerHTML = `<div class="finding crit">KPIs indisponíveis: ${esc(e.message)}</div>`; }
+    try { renderAvisos(); } catch(e){ $("avisos").innerHTML = `<div class="aviso">avisos indisponíveis: ${esc(e.message)}</div>`; }
+    try { renderCategorias(); } catch(e){ $("tab-categorias").innerHTML = `<p class="note">ritmo indisponível: ${esc(e.message)}</p>`; }
+    try { renderComercial(); } catch(e){ $("kpis-comercial").innerHTML = ""; }
+    try { renderMetas(); } catch(e){ $("metas-receita").innerHTML = `<p class="note">metas indisponíveis: ${esc(e.message)}</p>`; }
+    renderPendentes();
+  }
+
+  function renderFiltros(){
+    document.querySelectorAll("#seg-periodo button").forEach(b => b.classList.toggle("on", b.dataset.p === state.periodo));
+    document.querySelectorAll("#seg-modo button").forEach(b => b.classList.toggle("on", b.dataset.m === state.modo));
+    document.querySelectorAll("#seg-sup button").forEach(b => b.classList.toggle("on", b.dataset.s === state.superior));
+    const j = janela(); $("f-ini").value = j.ini; $("f-fim").value = j.fim;
+    const custom = state.periodo === "custom";
+    $("f-ini").style.display = $("f-fim").style.display = custom ? "" : "none";
+    const sup = state.superior === "1" ? " · Filtro de ensino superior ativo: as seções de leads passam a considerar só leads com escolaridade superior (entra na fase 3)." : "";
+    $("filter-desc").textContent = "Período " + dmy(j.ini) + " – " + dmy(j.fim) + " · " + FILTER_LABEL[state.modo] + sup;
+  }
+
+  function renderKpis(){
+    const A = agregar(RAW.vendas.atual), Y = agregar(RAW.vendas.yoy), M = agregar(RAW.vendas.mom);
+    const g = A.geral, gy = Y.geral, gm = M.geral;
+    const tk = g.qty ? g.rev / g.qty : 0, tky = gy.qty ? gy.rev / gy.qty : 0, tkm = gm.qty ? gm.rev / gm.qty : 0;
+    const growth = (a, b) => b > 0 ? (a - b) / b * 100 : null;
+    const sub = (a, b, fmt, lbl) => { const gr = growth(a, b); return gr == null ? `<div class="s muted">sem comparável ${lbl}</div>` : `<div class="s ${cls(gr)}">${fmtPct(gr)} vs. ${lbl} (${fmt(b)})</div>`; };
+    const jy = RAW.janelas.yoy, jm = RAW.janelas.mom;
+    const lblY = "mesmo período " + jy.ini.slice(0,4), lblM = "mês anterior (" + dm(jm.ini) + "–" + dm(jm.fim) + ")";
+    const labelRec = {total:"Receita líquida do período (total)", nova:"Receita de vendas novas", parcela:"Receita de parcelas"}[state.modo];
+    const labelFat = {total:"Faturas pagas", nova:"Vendas novas", parcela:"Cobranças de parcela"}[state.modo];
+    $("kpis").innerHTML = `
+      <div class="kpi"><div class="l">${labelRec}</div><div class="v num">${fmtR(g.rev)}</div>${sub(g.rev, gy.rev, fmtR, lblY)}<div class="s2">${growth(g.rev, gm.rev) == null ? "" : fmtPct(growth(g.rev, gm.rev)) + " vs. " + lblM}</div></div>
+      <div class="kpi"><div class="l">${labelFat}</div><div class="v num">${fmtN(g.qty)}</div>${sub(g.qty, gy.qty, fmtN, lblY)}<div class="s2">${growth(g.qty, gm.qty) == null ? "" : fmtPct(growth(g.qty, gm.qty)) + " vs. " + lblM}</div></div>
+      <div class="kpi"><div class="l">Ticket médio</div><div class="v num">${fmtR(tk)}</div>${sub(tk, tky, fmtR, lblY)}<div class="s2">${growth(tk, tkm) == null ? "" : fmtPct(growth(tk, tkm)) + " vs. " + lblM}</div></div>
+      <div class="kpi"><div class="l">Inscritos reais no período</div><div class="v num muted">—</div><div class="s muted">entra na fase 3 (leads por dia-calendário Manaus, sem importações)</div></div>`;
+
+    // achado do mês — gerado a partir dos números, nunca fixo
+    const T = agregar(RAW.vendas.atual); // total sempre, p/ a composição
+    const nova = (RAW.vendas.atual || []).filter(r => r.tipo_fatura === "nova");
+    const nq = nova.length, nr = nova.reduce((a, r) => a + (Number(r.net_value) || 0), 0);
+    const totQ = (RAW.vendas.atual || []).length, totR = (RAW.vendas.atual || []).reduce((a, r) => a + (Number(r.net_value) || 0), 0);
+    const novaY = (RAW.vendas.yoy || []).filter(r => r.tipo_fatura === "nova");
+    const nqy = novaY.length, nry = novaY.reduce((a, r) => a + (Number(r.net_value) || 0), 0);
+    const pq = totQ ? Math.round(nq / totQ * 100) : 0;
+    let txt;
+    if (state.modo === "total"){
+      txt = `<b>Leia com o filtro certo:</b> das ${fmtN(totQ)} faturas pagas do período, <b>${fmtN(nq)} (${pq}%) são vendas novas de fato</b> — as outras ${fmtN(totQ - nq)} são cobranças recorrentes de vendas anteriores. ` +
+        (nqy ? `Olhando só venda nova: <b>${fmtPct((nq - nqy) / nqy * 100)} em negócios</b> e <b>${fmtPct(nry ? (nr - nry) / nry * 100 : 0)} em receita nova</b> vs. o mesmo período de ${jy.ini.slice(0,4)}.` : "Sem comparável de venda nova no ano anterior.") +
+        (totR > 0 && nr / totR < 0.75 && nqy && nr < nry ? " A receita de parcelas está mascarando uma queda real em vendas novas." : "");
+    } else if (state.modo === "nova"){
+      txt = `<b>Esta é a visão correta de "venda nova".</b> ${fmtN(nq)} vendas novas` + (nqy ? ` (${fmtPct((nq - nqy) / nqy * 100)} vs. ${fmtN(nqy)} em ${jy.ini.slice(0,4)})` : "") +
+        ` e <b>${fmtR(nr)}</b> em receita nova` + (nry ? ` (${fmtPct((nr - nry) / nry * 100)} vs. ${fmtR(nry)})` : "") + ` — ticket médio real ${fmtR(nq ? nr / nq : 0)}` + (nqy ? ` (${fmtPct(((nq ? nr / nq : 0) - nry / nqy) / (nry / nqy) * 100)} vs. ${fmtR(nry / nqy)})` : "") + ".";
+    } else {
+      const pr = totR - nr, pry = (RAW.vendas.yoy || []).filter(r => r.tipo_fatura === "parcela").reduce((a, r) => a + (Number(r.net_value) || 0), 0);
+      txt = `Receita de <b>parcelas de assinaturas já vendidas</b>: ${fmtR(pr)}` + (pry ? ` (${fmtPct((pr - pry) / pry * 100)} vs. ${fmtR(pry)} em ${jy.ini.slice(0,4)})` : "") + `. Esperado quando produtos parcelados lançados no ano cobram ao longo dos meses — é receita real, mas não negócio novo.`;
+    }
+    $("finding-mes").innerHTML = txt;
+  }
+
+  function renderAvisos(){
+    const av = [];
+    const nv = RAW.avisos && RAW.avisos.produtos_nao_validados;
+    if (nv) av.push({ic:"🏷️", t:`<b>${fmtN(nv)} produtos Hubla com categoria derivada só pelo nome</b> (não validados). A soma Elite/Upsell/Recorrente/Outros bate com o total, mas a classificação de cada produto pode ser ajustada na Configuração.`, cls:""});
+    av.push({ic:"🧾", t:`<b>Venda nova × parcela:</b> uma fatura de renovação de assinatura (<code>invoice_type = 'Renovação'</code>) nunca conta como venda nova, mesmo sendo a 1ª cobrança — por isso o total de "vendas novas" pode ficar 1 abaixo de contagens antigas que ignoravam esse campo.`});
+    av.push({ic:"📅", t:`<b>Mês em andamento:</b> os números do período atual sobem ao longo do dia. Cada carga tem hora registrada (${new Date(RAW.generated_at).toLocaleString("pt-BR", {timeZone:"America/Manaus"})}, Manaus).`});
+    if (RAW.anne && !RAW.anne.ok) av.push({ic:"⚠️", t:`<b>Anne indisponível:</b> ${esc(RAW.anne.error)} — as seções que dependem da Anne (2, 3, 9, 11-disparos) ficam sem dado até a conexão voltar.`, cls:"crit"});
+    av.push({ic:"🔎", t:`<b>Ressalvas por seção</b> (estado real do rastreamento, não erro de query): ~79% das vendas sem canal de aquisição rastreável (4) · atribuição de canal de venda majoritariamente por código, ~20% confirmada na Anne (5) · "ativo em grupo" significa só "entrou e não saiu" (2) · CAC da Meta é piso, ~49% das vendas sem UTM (11) · só o PRF tem scoring de estrela (ref. A). Cada uma aparece ao lado do número na tela correspondente, conforme as fases entram.`});
+    $("avisos").innerHTML = av.map(a => `<div class="aviso ${a.cls || ""}"><span class="ic">${a.ic}</span><div>${a.t}</div></div>`).join("");
+  }
+
+  function renderCategorias(){
+    const A = agregar(RAW.vendas.atual), Y = agregar(RAW.vendas.yoy), metas = metasMes();
+    const j = RAW.janelas.atual, hoje = RAW.hoje;
+    const decorridos = diasEntre(j.ini, j.fim);
+    const fimMes = ultimoDiaMes(j.ini);
+    const restantes = Math.max(diasEntre(j.fim, fimMes) - 1, 0);
+    let html = `<table><thead><tr><th class="rowlabel">Categoria</th><th>Meta do mês</th><th>Realizado ${j.ini.slice(0,4)}</th><th>% Atingimento</th><th>Realizado ${RAW.janelas.yoy.ini.slice(0,4)}*</th><th>Dif. YoY (R$)</th><th>Growth YoY</th></tr></thead><tbody>`;
+    let tm = 0, tr = 0, ty = 0, allSet = true;
+    for (const [k, nome] of CATS){
+      const r = A[k].rev, y = Y[k].rev, m = metas[k] || 0;
+      if (m) tm += m; else allSet = false; tr += r; ty += y;
+      const dif = r - y, gr = y > 0 ? dif / y * 100 : null;
+      const pct = m > 0 ? r / m : null, st = pct != null ? statusFor(pct) : null;
+      html += `<tr><td class="rowlabel">${nome}</td><td><input class="meta-input" type="number" data-meta="${k}" value="${m || ""}" placeholder="0"></td>
+        <td>${fmtR(r)} <span class="muted">· ${fmtN(A[k].qty)}</span></td>
+        <td>${pct != null ? Math.round(pct*100) + "% <span class='pill " + st.cls + "'>" + st.label + "</span>" : "<span class='pill neutral'>defina a meta</span>"}</td>
+        <td>${fmtR(y)} <span class="muted">· ${fmtN(Y[k].qty)}</span></td><td class="${cls(dif)}">${fmtDif(dif)}</td>
+        <td class="${gr == null ? (r > 0 ? "good" : "muted") : cls(gr)}">${gr == null ? (r > 0 ? "produto novo" : "—") : fmtPct(gr)}</td></tr>`;
+    }
+    const difT = tr - ty, grT = ty > 0 ? difT / ty * 100 : null, pctT = tm > 0 ? tr / tm : null, stT = pctT != null ? statusFor(pctT) : null;
+    html += `<tr class="total"><td class="rowlabel">TOTAL (3 categorias)</td><td>${tm > 0 ? fmtR(tm) + (allSet ? "" : " (parcial)") : "—"}</td><td>${fmtR(tr)}</td>
+      <td>${pctT != null ? Math.round(pctT*100) + "% <span class='pill " + stT.cls + "'>" + stT.label + "</span>" : "<span class='pill neutral'>—</span>"}</td>
+      <td>${fmtR(ty)}</td><td class="${cls(difT)}">${fmtDif(difT)}</td><td class="${grT == null ? "muted" : cls(grT)}">${grT == null ? "—" : fmtPct(grT)}</td></tr></tbody></table>`;
+    $("tab-categorias").innerHTML = html;
+    $("nota-geral").innerHTML = `*Mesmo recorte de dias em ${RAW.janelas.yoy.ini.slice(0,4)} (${dm(RAW.janelas.yoy.ini)}–${dm(RAW.janelas.yoy.fim)}), YoY comparável. Total do período em <b>todos</b> os produtos: <b>${fmtR(A.geral.rev)}</b> (${fmtN(A.geral.qty)} faturas) vs. ${fmtR(Y.geral.rev)} (${fmtN(Y.geral.qty)}) — "Outros" (${fmtR(A.outros.rev)}, ${fmtN(A.outros.qty)}) = low tickets, eventos, renovação, cursos avulsos.`;
+    document.querySelectorAll("#tab-categorias input[data-meta]").forEach(inp => inp.addEventListener("change", () => salvarMeta(inp.dataset.meta, inp.value)));
+    // cards de ritmo
+    $("avg-cards").innerHTML = CATS.map(([k, nome]) => {
+      const r = A[k].rev, m = metas[k] || 0, media = decorridos ? r / decorridos : 0;
+      const falta = m > 0 ? Math.max(m - r, 0) : null, porDia = falta != null && restantes > 0 ? falta / restantes : null;
+      const clsTogo = porDia == null ? "muted" : (porDia > media ? "crit" : "good");
+      return `<div class="card"><h3>${nome}</h3><div class="avg-grid" style="margin-top:8px">
+        <div class="avg-cell"><div class="k">Dias decorridos</div><div class="v">${decorridos}</div></div>
+        <div class="avg-cell"><div class="k">Média/dia até agora</div><div class="v num">${fmtR(media)}</div></div>
+        <div class="avg-cell"><div class="k">Dias restantes</div><div class="v">${restantes}</div></div>
+        <div class="avg-cell"><div class="k">Média/dia necessária</div><div class="v num ${clsTogo}">${porDia == null ? (falta === 0 ? "meta batida" : "—") : fmtR(porDia)}</div></div></div></div>`;
+    }).join("");
+  }
+
+  function renderComercial(){
+    const a = RAW.anne || {};
+    if (!a.ok){ $("kpis-comercial").innerHTML = ""; return; }
+    const vend = (a.vendedores || []).filter(v => v.tipo === "closer").map(v => v.nome).join(", ");
+    $("kpis-comercial").innerHTML = `
+      <div class="kpi"><div class="l">Conversas entregues ao time humano (agora)</div><div class="v num">${fmtN(a.humano_comercial)}</div><div class="s muted">status <code>humano_comercial</code> na Anne</div></div>
+      <div class="kpi"><div class="l">Closers ativos</div><div class="v num">${(a.vendedores || []).filter(v => v.tipo === "closer").length}</div><div class="s muted">${esc(vend)}</div></div>`;
+  }
+
+  function renderMetas(){
+    const metas = metasMes(); const mes = RAW.filtros.ini.slice(0,8) + "01";
+    $("metas-mes").textContent = "mês de " + mes.slice(5,7) + "/" + mes.slice(0,4) + " · gravadas no banco, visíveis para todo o time";
+    const row = (k, nome) => `<tr><td class="rowlabel">${nome}</td><td><input class="meta-input" type="number" data-meta="${k}" value="${metas[k] || ""}" placeholder="0"></td></tr>`;
+    $("metas-receita").innerHTML = `<table><thead><tr><th class="rowlabel">Categoria</th><th>Meta (R$)</th></tr></thead><tbody>${CATS.map(([k, n]) => row(k, n)).join("")}</tbody></table>`;
+    $("metas-leads").innerHTML = `<table><thead><tr><th class="rowlabel">Canal</th><th>Meta (leads)</th></tr></thead><tbody>${METAS_LEADS.map(([k, n]) => row(k, n)).join("")}</tbody></table>`;
+    document.querySelectorAll("#p-config input[data-meta]").forEach(inp => inp.addEventListener("change", () => salvarMeta(inp.dataset.meta, inp.value)));
+    const ult = (RAW.metas || []).filter(r => r.mes === mes && r.atualizado_por).sort((a, b) => (b.updated_at || "").localeCompare(a.updated_at || ""))[0];
+    $("metas-nota").textContent = ult ? `Última alteração: ${esc(ult.atualizado_por)} em ${new Date(ult.updated_at).toLocaleString("pt-BR", {timeZone:"America/Manaus"})}.` : "Nenhuma meta definida para este mês ainda.";
+  }
+
+  async function salvarMeta(chave, valor){
+    let v = parseFloat(valor); if (!isFinite(v) || v < 0) v = 0;
+    const mes = RAW.filtros.ini.slice(0,8) + "01";
+    let por = ""; try { por = localStorage.getItem("com_quem") || ""; if (!por){ por = prompt("Seu nome (fica registrado em quem alterou a meta):") || ""; localStorage.setItem("com_quem", por); } } catch(e){}
+    try{
+      const r = await fetch(API + "?k=" + encodeURIComponent(K) + "&resource=metas", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({mes, chave, valor:v, por})});
+      const d = await r.json(); if (d.error) throw new Error(d.error);
+      RAW.metas = d.metas; renderCategorias(); renderMetas();
+    }catch(e){ alert("Não foi possível salvar a meta: " + e.message); }
+  }
+
+  function renderPendentes(){
+    const bl = {
+      demanda: ["1.1 Inscritos por canal de marketing — 8 canais fixos, meta, MoM, % atingimento e gráfico acumulado (mesma query)", "1.2 Inscritos por evento/ação × concurso — Webinário · Estude Comigo · Venda Direta · Site direto · Direct Response · Lançamento · Não mapeado + alerta do gap de tracking da VSL PlayPassei", "1.3 Inscritos por produto — com 'sem concurso vinculado' e interesse múltiplo"],
+      engajamento: ["2 Engajados — composição Data Core × Anne, por produto, ativos 7 dias, limitações do sinal de grupo", "3 Engajados não matriculados — por concurso + exportação nominal (confidencial)", "Ref. A Segmentação por estrela — PRF e por concurso (snapshot diário)"],
+      receita: ["4 Matrículas por canal de entrada", "5 Matrículas por canal de venda (código utm_term × atribuição da Anne)", "6 Funil geral em 3 janelas", "7B Ritmo por produto", "8 Evolução diária acumulada (DoD) por canal", "10 Controle de desconto e cupons"],
+      comercial: ["9A Produtividade do time humano (ligações, recebidos, devolvidos, matriculados)", "9B Leads da Anne fora do pipeline (ia / dormant / human / opted_out × 6+ e 10+ msgs)", "9C Quem assume, engaja e converte (escalations.claimed_by)", "Ref. B Motivos de perda"],
+      financeiro: ["11 Gasto Meta Ads, CAC (piso), ROAS, CPL — com a ressalva de cobertura de UTM", "11 Disparos: campanhas, enviadas, taxa de resposta, vendas até 10 dias após (correlação, não causa)"],
+    };
+    for (const k in bl) $("pend-" + k).innerHTML = `<b>Em construção</b> — blocos que entram nesta tela (todos os do protótipo):<ul style="margin:6px 0 0 18px">${bl[k].map(x => `<li>${x}</li>`).join("")}</ul>`;
+  }
+
+  /* ================= NAV / EVENTOS ================= */
+  function route(){
+    const id = (location.hash.replace(/^#\/?/, "") || "visao").split("?")[0];
+    const ok = PAGES.some(p => p.id === id) ? id : "visao";
+    document.querySelectorAll(".page").forEach(p => p.classList.toggle("on", p.id === "p-" + ok));
+    document.querySelectorAll("#nav a").forEach(a => a.classList.toggle("on", a.dataset.id === ok));
+    window.scrollTo({top:0});
+  }
+  $("nav").innerHTML = PAGES.map(p => `<a href="#/${p.id}" data-id="${p.id}"><span class="ic">${p.ic}</span>${p.label}${p.tag ? `<span class="tag">${p.tag}</span>` : ""}</a>`).join("");
+  window.addEventListener("hashchange", route); route();
+
+  document.querySelectorAll("#seg-periodo button").forEach(b => b.onclick = () => { state.periodo = b.dataset.p; if (b.dataset.p === "custom"){ const j = janela(); state.ini = j.ini; state.fim = j.fim; } saveState(); renderFiltros(); if (b.dataset.p !== "custom") load(); });
+  $("f-ini").onchange = $("f-fim").onchange = () => { state.periodo = "custom"; state.ini = $("f-ini").value; state.fim = $("f-fim").value; if (state.ini && state.fim && state.ini <= state.fim){ saveState(); load(); } };
+  document.querySelectorAll("#seg-modo button").forEach(b => b.onclick = () => { state.modo = b.dataset.m; saveState(); if (RAW) renderAll(); });
+  document.querySelectorAll("#seg-sup button").forEach(b => b.onclick = () => { state.superior = b.dataset.s; saveState(); load(); });
+  $("f-contest").onchange = () => { state.contest = $("f-contest").value; saveState(); load(); };
+  $("btn-reload").onclick = load;
+  $("btn-theme").onclick = () => { const cur = document.documentElement.dataset.theme; const next = cur === "dark" ? "light" : (cur === "light" ? "" : "dark"); if (next) document.documentElement.dataset.theme = next; else delete document.documentElement.dataset.theme; try { localStorage.setItem("com_theme", next); } catch(e){} };
+  try { const t = localStorage.getItem("com_theme"); if (t) document.documentElement.dataset.theme = t; } catch(e){}
+
+  if (!K){ $("err").style.display = "block"; $("err").textContent = "Acesso restrito: informe o token na URL (?k=…)."; $("upd").textContent = "sem token"; }
+  else { load(); setInterval(load, 300000); }
+})();
+</script>
+</body>
+</html>
