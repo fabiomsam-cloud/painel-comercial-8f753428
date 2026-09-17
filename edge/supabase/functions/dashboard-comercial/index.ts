@@ -53,6 +53,28 @@ async function leads(db: SupabaseClient, ini: string, fim: string, superior: boo
       .range(a, b));
 }
 
+// deno-lint-ignore no-explicit-any
+type Row = Record<string, any>;
+// Une os contatos da Anne aos leads do período por lead_id (99,8% dos contatos têm o lead do Data Core em source_first).
+// Fecha "engajado" (≥1 sinal real) e "ativo 7d" (sinal nos últimos 7 dias) — definição operacional do briefing §5.2.
+function fundirAnne(leads: Row[], contatos: Row[], fim: string) {
+  const byLead = new Map<string, Row>();
+  for (const c of contatos) if (c.lead_id) { const prev = byLead.get(c.lead_id); if (!prev || (c.msg_user ?? 0) > (prev.msg_user ?? 0)) byLead.set(c.lead_id, c); }
+  const corte = Date.parse(fim + "T04:00:00.000Z") - 6 * 86400e3; // fim-6 dias, 00:00 Manaus
+  let batidos = 0;
+  for (const l of leads) {
+    const c = byLead.get(l.lead_id);
+    l.anne_msgs = c ? (c.msg_user ?? 0) : 0;
+    l.anne_status = c ? (c.status ?? null) : null;
+    l.anne_batido = !!c; if (c) batidos++;
+    const ultima = c?.last_user_message_at ? Date.parse(c.last_user_message_at) : 0;
+    l.anne_ativo_7d = !!c && ultima >= corte && !["dormant", "opted_out"].includes(c.status ?? "");
+    l.engajado = !!(l.sig_score || l.sig_survey || l.sig_grupo || l.sig_webinar || l.anne_msgs >= 2);
+    l.ativo_7d = !!(l.ativo_webinar_7d || l.ativo_grupo_7d || l.anne_ativo_7d);
+  }
+  return batidos;
+}
+
 async function anne(ini: string, fim: string) {
   try {
     const r = await fetch(`${ANNE_URL}?k=${TOKEN}&ini=${ini}&fim=${fim}`);
@@ -75,6 +97,24 @@ Deno.serve(async (req: Request) => {
   const superior = url.searchParams.get("superior") === "1";
   const contest = url.searchParams.get("contest") || null;
   const mes = ini.slice(0, 8) + "01";
+
+  // ---- SEÇÃO 3: lista nominal (CSV) de engajados não matriculados — CONFIDENCIAL, só com o token ----
+  if (url.searchParams.get("resource") === "lista_nao_matriculados") {
+    try {
+      const [ls, an] = await Promise.all([
+        fetchAll((a, b) => db.rpc("fn_comercial_leads", { p_ini: ini, p_fim: fim, p_superior: superior, p_contest: contest, p_export: true }).range(a, b)),
+        anne(ini, fim),
+      ]);
+      fundirAnne(ls as Row[], (an as Row).contatos ?? [], fim);
+      const rows = (ls as Row[]).filter((l) => l.engajado && !l.matriculado);
+      const esc = (v: unknown) => { const t = String(v ?? ""); return /[;"\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t; };
+      const head = ["nome", "telefone", "email", "concursos", "dia_cadastro", "origem", "acao", "escolaridade", "sinais", "anne_status", "anne_msgs_lead"];
+      const csv = "\ufeff" + head.join(";") + "\n" + rows.map((l) => [l.nome, l.telefone, l.email, (l.contests ?? []).join("|"), l.dia, l.first_origin, l.acao, l.escolaridade,
+        [l.sig_webinar && "webinar", l.sig_pitch && "pitch", l.sig_grupo && "grupo", l.sig_survey && "pesquisa", l.sig_score && "score", l.anne_msgs >= 2 && "anne"].filter(Boolean).join("|"),
+        l.anne_status, l.anne_msgs].map(esc).join(";")).join("\n");
+      return new Response(csv, { headers: { ...corsHeaders, "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="engajados_nao_matriculados_${ini}_a_${fim}.csv"`, "Cache-Control": "no-store" } });
+    } catch (e) { return json({ error: String(e) }, 500); }
+  }
 
   // ---- METAS compartilhadas: GET lista do mês · POST {chave, valor, por} upsert e devolve a lista ----
   if (url.searchParams.get("resource") === "metas") {
@@ -103,7 +143,7 @@ Deno.serve(async (req: Request) => {
       mom: { ini: addMonths(ini, -1), fim: addMonths(fim, -1) },
       yoy: { ini: addMonths(ini, -12), fim: addMonths(fim, -12) },
     };
-    const [vAtual, vMom, vYoy, metas, cfg, anneData, cupons, lAtual, lMom, lYoy, contests, meta] = await Promise.all([
+    const [vAtual, vMom, vYoy, metas, cfg, anneData, cupons, lAtual, lMom, lYoy, contests, meta, estrela] = await Promise.all([
       vendas(db, janelas.atual.ini, janelas.atual.fim, superior, contest),
       vendas(db, janelas.mom.ini, janelas.mom.fim, superior, contest),
       vendas(db, janelas.yoy.ini, janelas.yoy.fim, superior, contest),
@@ -116,14 +156,24 @@ Deno.serve(async (req: Request) => {
       leads(db, janelas.yoy.ini, janelas.yoy.fim, superior, contest),
       db.from("contests").select("code, name").order("name"),
       fetchAll((a, b) => db.rpc("fn_comercial_meta_spend", { p_ini: ini, p_fim: fim }).range(a, b)),
+      db.rpc("fn_comercial_estrela"),
     ]);
     if (metas.error) throw new Error(metas.error.message);
+    // Anne × leads (só a janela atual tem contatos da Anne; MoM/YoY ficam só com sinais do Data Core)
+    const anneOk = !!(anneData as Row).ok;
+    const contatos: Row[] = anneOk ? ((anneData as Row).contatos ?? []) : [];
+    const batidos = fundirAnne(lAtual as Row[], contatos, fim);
+    fundirAnne(lMom as Row[], [], janelas.mom.fim); fundirAnne(lYoy as Row[], [], janelas.yoy.fim);
+    const anneResumo = { ok: anneOk, contatos: contatos.length, batidos, com_2_msgs: contatos.filter((c) => (c.msg_user ?? 0) >= 2).length };
+    if (anneOk) delete (anneData as Row).contatos;   // não mandar phone_norm ao navegador
 
     return json({
       generated_at: new Date().toISOString(),
       hoje, filtros: { ini, fim, superior, contest }, janelas,
       vendas: { atual: vAtual, mom: vMom, yoy: vYoy },
       leads: { atual: lAtual, mom: lMom, yoy: lYoy },
+      anne_resumo: anneResumo,
+      estrela: estrela.error ? { error: estrela.error.message } : (estrela.data ?? []),
       contests: contests.data ?? [],
       meta_spend: meta,
       metas: metas.data ?? [],

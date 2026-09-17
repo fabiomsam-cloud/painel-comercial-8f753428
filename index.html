@@ -212,8 +212,44 @@
 
     <!-- ===== ENGAJAMENTO ===== -->
     <div class="page" id="p-engajamento">
-      <div class="page-head"><h2>Engajamento</h2><p>Engajados e ativos por produto (2), engajados não matriculados (3) e segmentação por estrela (ref. A).</p></div>
-      <div class="pending-card" id="pend-engajamento"></div>
+      <div class="page-head"><h2>Engajamento</h2><p>Engajados e ativos por produto (2), engajados não matriculados (3) e segmentação por estrela (ref. A). União Data Core × Anne por <code>lead_id</code> (a Anne guarda o id do lead do Data Core em 99,8% dos contatos) — sem variação entre execuções.</p></div>
+      <div class="kpi-row" id="kpis-eng"></div>
+
+      <section id="s2">
+        <div class="section-head"><div><span class="section-num">02</span> <h2>Engajados — por produto e "ativos"</h2></div><span class="section-sub">survey_answers + group_events + webinar_events + lead_interests.score (Data Core) ∪ conversas reais (Anne)</span></div>
+        <div class="card">
+          <p class="note"><b>Definição operacional de ENGAJADO</b> (lead com ≥1 sinal real, nunca um default do sistema): <code>lead_interests.score &gt; 0</code> OU linha em <code>survey_answers</code> OU <code>group_events.entered / answered_survey</code> OU <code>webinar_events.attended / clicked_link</code> OU, na Anne, contato com <b>≥2 mensagens do próprio lead</b> (conversa real, não só recebeu disparo).</p>
+          <div class="tablewrap" style="margin-top:12px" id="tab-s2a"></div>
+          <p class="note" style="margin-top:10px" id="nota-s2a"></p>
+        </div>
+        <div class="card">
+          <h3>Engajados por produto (concurso)</h3>
+          <div class="tablewrap" style="margin-top:10px" id="tab-s2b"></div>
+          <h3 style="margin-top:16px">Quem está "ativo" na ação agora (não só já engajou algum dia)</h3>
+          <p class="note" style="margin-top:8px" id="nota-s2c"></p>
+          <div class="tablewrap" style="margin-top:10px" id="tab-s2c"></div>
+          <div class="finding crit" style="margin-top:12px" id="finding-s2"></div>
+          <div class="finding" style="margin-top:10px"><b>Limitações do dado (não mudam com o período):</b> grupo de WhatsApp é o sinal mais fraco — o banco só registra entrada e saída, <b>não existe</b> campo de "última atividade dentro do grupo" (leu, respondeu, assistiu à aula); "ativo em grupo" aqui significa só "entrou há pouco e não saiu". <code>group_events.answered_survey_at</code> está 100% nulo. <code>survey_answers</code> praticamente não recebe respostas de leads novos (a pesquisa é respondida depois, no grupo/webinário). O sinal que domina "ativo" é o webinário; a Anne é o segundo.</div>
+        </div>
+      </section>
+
+      <section id="s3">
+        <div class="section-head"><div><span class="section-num">03</span> <h2>Engajados não matriculados</h2></div><span class="section-sub">engajados do período EXCEPT venda nova paga (por lead_id, e-mail) ∪ orders_elite pago</span></div>
+        <div class="card">
+          <div class="tablewrap" id="tab-s3"></div>
+          <p class="note" style="margin-top:10px" id="nota-s3"></p>
+          <div style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn" id="btn-export-s3">⬇ Exportar lista nominal (CSV)</button><span class="note">Nome, telefone, e-mail, concursos, sinais e status na Anne. <b>Confidencial</b>: uso interno do time comercial; não subir em ferramenta de terceiro.</span></div>
+        </div>
+      </section>
+
+      <section id="s-estrela">
+        <div class="section-head"><div><span class="section-num">ref. A</span> <h2>Segmentação por estrela</h2></div><span class="section-sub" id="sub-estrela">lead_interests.score · base histórica completa · snapshot diário (03:00 Manaus) · dedup por lead (maior score por lead e concurso)</span></div>
+        <div class="grid-2">
+          <div class="card"><h3 id="h-estrela">PRF (funil perpétuo)</h3><div class="barlist" style="display:flex;flex-direction:column;gap:8px;margin-top:10px" id="bar-estrela"></div><p class="note" style="margin-top:14px" id="nota-estrela"></p></div>
+          <div class="card"><div class="finding crit" id="finding-estrela-zero"></div><div class="finding" style="margin-top:10px"><b>Sobre o 54% × 34%:</b> o protótipo mostrava 1.410 (54%) na faixa máxima numa consulta e 875 (34%) em outra. A diferença era dedup: um lead com várias linhas em <code>lead_interests</code> contado mais de uma vez. O painel adota <b>uma linha por lead</b> (maior score), que dá o 34%. Faixas: ★★★★★ 91–100 · ★★★★ 71–90 · ★★★ 51–70 · ★★ 21–50 · ★ 1–20.</div></div>
+        </div>
+        <div class="card"><h3>Por concurso — só o PRF tem scoring de verdade</h3><div class="tablewrap" style="margin-top:10px" id="tab-estrela"></div><div class="finding crit" style="margin-top:12px" id="finding-estrela"></div></div>
+      </section>
     </div>
 
     <!-- ===== RECEITA ===== -->
@@ -231,7 +267,7 @@
       </section>
 
       <section id="s6">
-        <div class="section-head"><div><span class="section-num">06</span> <h2>Visão geral do funil — Inscritos → Engajados → Matriculados</h2></div><span class="section-sub">inscritos = leads do período · engajados = sinais do Data Core (pesquisa, grupo, webinário, score) — a união com a Anne entra na fase 4 · matrícula = venda nova real</span></div>
+        <div class="section-head"><div><span class="section-num">06</span> <h2>Visão geral do funil — Inscritos → Engajados → Matriculados</h2></div><span class="section-sub">inscritos = leads do período · engajados = definição da seção 2 (Data Core ∪ Anne no período atual; janelas comparativas só Data Core) · matrícula = venda nova real</span></div>
         <div class="card"><div class="tablewrap" id="tab-s6"></div>
           <div class="finding crit" style="margin-top:12px"><b>Ressalva herdada do protótipo:</b> em agosto/26, 167 dos 238 matriculados tinham <code>first_origin = 'hubla'</code> — o lead só foi criado no momento da compra, nunca passou por "inscrito"/"engajado". Isso infla a taxa Engajado→Matriculado do mês anterior (o protótipo mostrou 192%). <b>A leitura confiável é Inscrito→Engajado</b>, e mesmo ela pode refletir mudança de captura (webinar_events/survey_answers passaram a registrar mais em setembro) — confirmar com o time técnico antes de comemorar o salto.</div></div>
       </section>
@@ -304,7 +340,7 @@
   const PAGES = [
     {id:"visao", label:"Visão executiva", ic:"🏠"},
     {id:"demanda", label:"Demanda", ic:"📥"},
-    {id:"engajamento", label:"Engajamento", ic:"🔥", tag:"fase 4"},
+    {id:"engajamento", label:"Engajamento", ic:"🔥"},
     {id:"receita", label:"Receita", ic:"💰"},
     {id:"comercial", label:"Time comercial", ic:"☎️", tag:"fase 5"},
     {id:"financeiro", label:"Financeiro", ic:"📊", tag:"fase 5"},
@@ -392,7 +428,7 @@
     try { renderAvisos(); } catch(e){ $("avisos").innerHTML = `<div class="aviso">avisos indisponíveis: ${esc(e.message)}</div>`; }
     try { renderCategorias(); } catch(e){ $("tab-categorias").innerHTML = `<p class="note">ritmo indisponível: ${esc(e.message)}</p>`; }
     try { renderContestSelect(); } catch(e){ console.error(e); }
-    for (const [fn, id] of [[renderKpisDemanda, "kpis-demanda"], [renderS11, "tab-s11"], [renderS12, "tab-s12"], [renderS13, "tab-s13"], [renderS4, "tab-s4"], [renderS5, "tab-s5"], [renderS6, "tab-s6"], [renderS7B, "tab-s7b"], [renderS8, "tab-s8"], [renderS10, "cards-s10"]]){
+    for (const [fn, id] of [[renderKpisEng, "kpis-eng"], [renderS2, "tab-s2a"], [renderS3, "tab-s3"], [renderEstrela, "bar-estrela"], [renderKpisDemanda, "kpis-demanda"], [renderS11, "tab-s11"], [renderS12, "tab-s12"], [renderS13, "tab-s13"], [renderS4, "tab-s4"], [renderS5, "tab-s5"], [renderS6, "tab-s6"], [renderS7B, "tab-s7b"], [renderS8, "tab-s8"], [renderS10, "cards-s10"]]){
       try { fn(); } catch(e){ $(id).innerHTML = `<p class="note crit">seção indisponível: ${esc(e.message)}</p>`; console.error(fn.name, e); }
     }
     try { renderComercial(); } catch(e){ $("kpis-comercial").innerHTML = ""; }
@@ -501,6 +537,77 @@
   }
 
 
+
+
+  /* ================= FASE 4 — ENGAJAMENTO ================= */
+  const grupoContest = r => r.n_contests === 0 ? ["__sem"] : r.contests;
+  function renderKpisEng(){
+    const L = RAW.leads.atual, eng = L.filter(r => r.engajado), ativos = L.filter(r => r.ativo_7d), naoMat = eng.filter(r => !r.matriculado);
+    const A = RAW.anne_resumo || {};
+    $("kpis-eng").innerHTML = `
+      <div class="kpi"><div class="l">Engajados no período</div><div class="v num">${fmtN(eng.length)}</div><div class="s muted">${pctTxt(eng.length, L.length)} de ${fmtN(L.length)} inscritos (união, sem dupla contagem)</div></div>
+      <div class="kpi"><div class="l">Ativos nos últimos 7 dias</div><div class="v num">${fmtN(ativos.length)}</div><div class="s muted">${pctTxt(ativos.length, L.length)} dos inscritos · ${pctTxt(ativos.filter(r => r.engajado).length, eng.length)} dos engajados</div></div>
+      <div class="kpi"><div class="l">Engajados não matriculados</div><div class="v num crit">${fmtN(naoMat.length)}</div><div class="s muted">base quente a atacar (seção 3)</div></div>
+      <div class="kpi"><div class="l">Batidos na Anne</div><div class="v num">${A.ok ? fmtN(L.filter(r => r.anne_batido).length) : "—"}</div><div class="s muted">${A.ok ? pctTxt(L.filter(r => r.anne_batido).length, L.length) + " dos inscritos têm contato na Anne · " + fmtN(L.filter(r => r.anne_msgs >= 2).length) + " com 2+ mensagens do lead" : "Anne indisponível nesta carga"}</div></div>`;
+  }
+  function renderS2(){
+    const L = RAW.leads.atual, n = L.length, A = RAW.anne_resumo || {};
+    const dc = L.filter(r => r.sig_score || r.sig_survey || r.sig_grupo || r.sig_webinar).length, an = L.filter(r => r.anne_batido).length, an2 = L.filter(r => r.anne_msgs >= 2).length, eng = L.filter(r => r.engajado).length;
+    $("tab-s2a").innerHTML = tabela("s2_composicao", ["Métrica", "Valor", "% da base"], [
+      ["Engajados via Data Core (pesquisa / grupo / webinário / score)", dc, pctTxt(dc, n)],
+      ["Contatos batidos na Anne (por lead_id)", A.ok ? an : {html:"<span class='muted'>Anne indisponível</span>", raw:""}, A.ok ? pctTxt(an, n) : "—"],
+      ["…com 2+ mensagens do lead", A.ok ? an2 : {html:"—", raw:""}, A.ok ? pctTxt(an2, n) : "—"]],
+      {total:[{html:"TOTAL ENGAJADOS (união, sem dupla contagem)", raw:"TOTAL"}, {html:fmtN(eng), raw:eng}, {html:pctTxt(eng, n), raw:pctTxt(eng, n)}]});
+    const drv = [["webinário (attended/clicked)", L.filter(r => r.sig_webinar).length], ["grupo (entrou)", L.filter(r => r.sig_grupo).length], ["Anne 2+ msgs", an2], ["score > 0", L.filter(r => r.sig_score).length], ["pesquisa", L.filter(r => r.sig_survey).length]].sort((a, b) => b[1] - a[1]);
+    $("nota-s2a").innerHTML = `Maior driver isolado: <b>${drv[0][0]} (${fmtN(drv[0][1])} leads)</b>; depois ${drv.slice(1).map(([k, v]) => k + " " + fmtN(v)).join(", ")}. Base de ${fmtN(n)} inscritos do período — o mesmo universo das seções 1.x, 3 e 6.`;
+    // por produto
+    const g = {}; for (const r of L) for (const c of grupoContest(r)){ (g[c] = g[c] || {n:0, e:0, a:0}); g[c].n++; if (r.engajado) g[c].e++; if (r.ativo_7d) g[c].a++; }
+    const lista = Object.entries(g).filter(([c]) => c !== "__sem").sort((a, b) => b[1].n - a[1].n);
+    const top = lista.slice(0, 8), rest = lista.slice(8); const outros = rest.reduce((o, [, x]) => ({n:o.n + x.n, e:o.e + x.e, a:o.a + x.a}), {n:0, e:0, a:0});
+    const sem = g.__sem || {n:0, e:0, a:0};
+    const pc = (a, b) => ({html: `<span class="${b && a / b >= 0.5 ? "good" : (b && a / b < 0.3 ? "crit" : "")}">${pctTxt(a, b)}</span>`, raw: b ? (a / b * 100).toFixed(1) : ""});
+    const rowsE = [...top.map(([c, x]) => [cLabel(c), x.n, x.e, pc(x.e, x.n)]), ...(rest.length ? [[`Outros concursos (${rest.length})`, outros.n, outros.e, pc(outros.e, outros.n)]] : []), ["Sem produto identificado", sem.n, sem.e, pc(sem.e, sem.n)]];
+    const totE = L.filter(r => r.engajado).length, totA = L.filter(r => r.ativo_7d).length;
+    $("tab-s2b").innerHTML = tabela("s2_engajados_produto", ["Concurso/Produto", "Leads", "Engajados", "%"], rowsE, {total:[{html:"TOTAL (leads únicos)", raw:"TOTAL"}, {html:fmtN(n), raw:n}, {html:fmtN(totE), raw:totE}, {html:pctTxt(totE, n), raw:""}]});
+    const J = RAW.janelas.atual;
+    $("nota-s2c").innerHTML = `Definição: sinal de atividade real nos <b>últimos 7 dias</b> (${dm(addDays(J.fim, -6))} a ${dm(J.fim)}) — mensagem do próprio lead na Anne (conversa fora de <code>dormant</code>/<code>opted_out</code>), <code>webinar_events.entered_at</code> / <code>clicked_checkout_at</code> recente, ou entrada em grupo recente sem saída registrada.`;
+    const rowsA = [...top.map(([c, x]) => [cLabel(c), x.n, x.a, pc(x.a, x.n)]), ...(rest.length ? [[`Outros concursos (${rest.length})`, outros.n, outros.a, pc(outros.a, outros.n)]] : []), ["Sem produto identificado", sem.n, sem.a, pc(sem.a, sem.n)]].sort((a, b) => (b[2] / Math.max(b[1], 1)) - (a[2] / Math.max(a[1], 1)));
+    $("tab-s2c").innerHTML = tabela("s2_ativos_7d", ["Concurso/Produto", "Leads", "Ativos (7d)", "% dos leads"], rowsA, {total:[{html:"TOTAL", raw:"TOTAL"}, {html:fmtN(n), raw:n}, {html:fmtN(totA), raw:totA}, {html:pctTxt(totA, n), raw:""}]});
+    // achado: concurso que engaja mas esfria (maior gap engajado→ativo entre os com ≥30 leads)
+    const cand = top.filter(([, x]) => x.n >= 30 && x.e >= 10).map(([c, x]) => ({c, x, gap: x.e / x.n - x.a / x.n, ret: x.a / x.e})).sort((a, b) => a.ret - b.ret)[0];
+    const engAt = L.filter(r => r.engajado && r.ativo_7d).length;
+    $("finding-s2").innerHTML = (cand ? `<b>${cLabel(cand.c)} é o caso mais crítico: ${pctTxt(cand.x.e, cand.x.n)} dos leads engajam em algum momento, mas só ${fmtN(cand.x.a)} de ${fmtN(cand.x.e)} engajados seguem ativos</b> — o funil "esquenta" e esfria rápido. ` : "") +
+      `Olhando geral: dos ${fmtN(totE)} engajados do período, <b>${fmtN(engAt)} (${pctTxt(engAt, totE)}) seguem ativos e ${fmtN(totE - engAt)} (${pctTxt(totE - engAt, totE)}) esfriaram</b> sem nenhum sinal recente. O sinal que mais pesa em "ativo" é ${[["webinário", L.filter(r => r.ativo_webinar_7d).length], ["Anne", L.filter(r => r.anne_ativo_7d).length], ["grupo", L.filter(r => r.ativo_grupo_7d).length]].sort((a, b) => b[1] - a[1]).map(([k, v]) => k + " (" + fmtN(v) + ")").join(", depois ")}.`;
+  }
+  function renderS3(){
+    const L = RAW.leads.atual, eng = L.filter(r => r.engajado), nm = eng.filter(r => !r.matriculado);
+    const g = {}; for (const r of nm) for (const c of grupoContest(r)) g[c] = (g[c] || 0) + 1;
+    const lista = Object.entries(g).filter(([c]) => c !== "__sem").sort((a, b) => b[1] - a[1]);
+    const rows = lista.slice(0, 8).map(([c, v]) => [cLabel(c), v]); const rest = lista.slice(8); if (rest.length) rows.push([`Outros (${rest.length} concursos)`, rest.reduce((a, [, v]) => a + v, 0)]); if (g.__sem) rows.push(["Sem concurso vinculado", g.__sem]);
+    const soma = Object.values(g).reduce((a, b) => a + b, 0);
+    $("tab-s3").innerHTML = tabela("s3_nao_matriculados", ["Concurso", "Engajados não matriculados"], rows, {total:[{html:"TOTAL (leads únicos)", raw:"TOTAL"}, {html:fmtN(nm.length), raw:nm.length}]});
+    const top2 = lista.slice(0, 2).map(([c]) => cLabel(c)).join(" e ");
+    $("nota-s3").innerHTML = `De ${fmtN(L.length)} inscritos, ${fmtN(eng.length)} (${pctTxt(eng.length, L.length)}) são engajados — desses, <b>${fmtN(nm.length)} ainda não converteram</b>: é a base quente que o time comercial deveria estar atacando${top2 ? ", concentrada em <b>" + top2 + "</b>" : ""}. A soma por concurso (${fmtN(soma)}) é maior que o total único quando um lead sinalizou mais de um concurso. "Matriculado" = venda nova paga por lead_id ou e-mail até o fim do período, ou pedido Elite pago.`;
+    $("btn-export-s3").onclick = () => { const j = RAW.filtros; window.open(API + "?" + new URLSearchParams({k:K, resource:"lista_nao_matriculados", ini:j.ini, fim:j.fim, superior: state.superior, contest: state.contest}).toString(), "_blank"); };
+  }
+  function renderEstrela(){
+    const E = Array.isArray(RAW.estrela) ? RAW.estrela : [];
+    if (!E.length){ $("bar-estrela").innerHTML = `<p class="note">snapshot indisponível${RAW.estrela && RAW.estrela.error ? ": " + esc(RAW.estrela.error) : ""}</p>`; return; }
+    const foco = E.find(e => e.contest_code === (state.contest || "PRF")) || E.find(e => e.contest_code === "PRF") || E[0];
+    $("h-estrela").textContent = cLabel(foco.contest_code) + (foco.contest_code === "PRF" ? " (funil perpétuo)" : "");
+    $("sub-estrela").textContent = "lead_interests.score · base histórica completa · snapshot de " + new Date(foco.gerado_em).toLocaleString("pt-BR", {timeZone:"America/Manaus"}) + " · dedup por lead (maior score por lead e concurso)";
+    const faixas = [["★★★★★ (91–100)", foco.faixa5, "var(--accent)"], ["★★★★ (71–90)", foco.faixa4, "var(--accent)"], ["★★★ (51–70)", foco.faixa3, "var(--gold)"], ["★★ (21–50)", foco.faixa2, "var(--warning)"], ["★ (1–20)", foco.faixa1, "var(--critical)"]];
+    const mx = Math.max(1, ...faixas.map(f => Number(f[1])));
+    $("bar-estrela").innerHTML = faixas.map(([n, v, c]) => `<div style="display:grid;grid-template-columns:150px 1fr 78px;align-items:center;gap:8px"><span style="font-size:12px;color:var(--ink-2)">${n}</span><div style="background:var(--surface-2);border-radius:5px;height:9px;overflow:hidden"><div style="height:100%;width:${(Number(v) / mx * 100).toFixed(0)}%;background:${c}"></div></div><span class="num" style="font-size:11.5px;text-align:right">${fmtN(Number(v))}</span></div>`).join("");
+    const pos = Number(foco.score_pos), tot = Number(foco.total_leads), f5 = Number(foco.faixa5);
+    $("nota-estrela").innerHTML = `${fmtN(pos)} leads de ${cLabel(foco.contest_code)} têm pontuação real acima de zero — desses, <b>${fmtN(f5)} (${pctTxt(f5, pos)}) estão na faixa máxima</b>.`;
+    $("finding-estrela-zero").innerHTML = `<b>${fmtN(tot - pos)} leads de ${cLabel(foco.contest_code)} (${pctTxt(tot - pos, tot)} da base do concurso) têm score = 0</b> — nunca foram pontuados, não é que sejam ruins. Filtrar sempre por <code>score is not null and score &gt; 0</code>.`;
+    const rows = E.filter(e => Number(e.total_leads) >= 100).map(e => { const p = Number(e.score_pos), t = Number(e.total_leads); const fx = [["★★★★★", e.faixa5], ["★★★★", e.faixa4], ["★★★", e.faixa3], ["★★", e.faixa2], ["★", e.faixa1]].map(([k, v]) => [k, Number(v)]).sort((a, b) => b[1] - a[1])[0];
+      return [cLabel(e.contest_code), t, {html: p ? fmtN(p) : "<span class='crit'>0</span>", raw:p}, {html: `<span class="${p / t >= 0.005 ? "good" : "crit"}">${(p / t * 100).toFixed(2).replace(".", ",")}%</span>`, raw:(p / t * 100).toFixed(2)}, {html: p ? `${fx[0]} — ${fmtN(fx[1])} (${pctTxt(fx[1], p)})` + (fx[1] / p > 0.9 ? " <span class='crit'>sem distribuição real</span>" : "") : "<span class='muted'>—</span>", raw: p ? fx[0] : ""}]; });
+    $("tab-estrela").innerHTML = tabela("refA_estrela_concurso", ["Concurso", "Total de leads (histórico)", "Score > 0", "% pontuado", "Faixa mais comum"], rows);
+    const semScore = E.filter(e => Number(e.total_leads) >= 100 && Number(e.score_pos) === 0).length, comScore = E.filter(e => Number(e.total_leads) >= 100 && Number(e.score_pos) > 0).length;
+    $("finding-estrela").innerHTML = `<b>Não dá para generalizar — o motor de scoring roda essencialmente só para o PRF.</b> Mesmo olhando a base histórica inteira, ${semScore} de ${semScore + comScore} concursos com volume têm 0% de leads pontuados; os poucos com sinal fora do PRF caem quase todos numa única faixa baixa — não é segmentação, é ruído. Provável causa: pipeline de scoring configurado só para o funil perpétuo do PRF (decisão técnica do Fábio). Enquanto isso, a segmentação por estrela <b>não é viável para os concursos do mês</b>; alternativa provisória: usar os sinais de engajamento da seção 2.`;
+  }
 
   /* ================= FASE 3 — DEMANDA ================= */
   const CONTEST_LABEL = {TJAM:"TJ-AM", SEDUC_PA:"SEDUC-PA", seduc_amazonas:"SEDUC-AM", MANAUSPREV:"ManausPrev", ses_e_semsa_manaus:"SES/SEMSA Manaus", PRF:"PRF", PCAM:"Polícia Civil AM", policia_federal:"Polícia Federal", PCIVIL:"Polícias Civis (bucket genérico)", INSS:"INSS", SEMED:"SEMED", PMAM:"PM-AM", ministerio_publico_do_amazonas:"MP-AM", CBMAM:"CBM-AM", TCE_AM:"TCE-AM", SEFAZ_AM:"SEFAZ-AM", DETRAN_AM:"DETRAN-AM", ALEAM:"ALEAM", CMM:"CMM", carreiras_tribunais:"Carreiras Tribunais", GUARDA_MANAUS:"Guarda Municipal", PCPA:"PC-PA", PLAYPASSEI:"Play Passei"};
@@ -684,10 +791,10 @@
   function renderS6(){
     const J = RAW.janelas, yr = J.atual.ini.slice(0,4);
     const mat = rows => rows.filter(r => r.tipo_fatura === "nova").length;
-    const eng = ls => ls.filter(r => r.sig_score || r.sig_survey || r.sig_grupo || r.sig_webinar).length;
-    const linha = (lbl, j, rows, ls) => { const i = ls.length, e = eng(ls), m = mat(rows); return [lbl + " (" + dm(j.ini) + "–" + dm(j.fim) + ")", i, {html: fmtN(e) + " <span class='pill build' title='só sinais do Data Core; a Anne entra na fase 4'>parcial</span>", raw:e}, m, {html: i ? pctTxt(e, i) : "—", raw: i ? (e / i * 100).toFixed(1) : ""}, {html: e ? pctTxt(m, e) : "—", raw: e ? (m / e * 100).toFixed(1) : ""}]; };
+    const eng = ls => ls.filter(r => r.engajado).length;
+    const linha = (lbl, j, rows, ls, parcial) => { const i = ls.length, e = eng(ls), m = mat(rows); return [lbl + " (" + dm(j.ini) + "–" + dm(j.fim) + ")", i, {html: fmtN(e) + (parcial ? " <span class='pill build' title='janelas comparativas usam só sinais do Data Core (a Anne é consultada só para o período atual)'>DC</span>" : ""), raw:e}, m, {html: i ? pctTxt(e, i) : "—", raw: i ? (e / i * 100).toFixed(1) : ""}, {html: e ? pctTxt(m, e) : "—", raw: e ? (m / e * 100).toFixed(1) : ""}]; };
     $("tab-s6").innerHTML = tabela("s6_funil", ["Período", "Inscritos", "Engajados", "Matriculados (venda nova)", "Insc→Eng", "Eng→Mat"], [
-      linha("Atual " + yr, J.atual, RAW.vendas.atual, RAW.leads.atual), linha("Mês anterior", J.mom, RAW.vendas.mom, RAW.leads.mom), linha("Mesmo período " + J.yoy.ini.slice(0,4), J.yoy, RAW.vendas.yoy, RAW.leads.yoy)]);
+      linha("Atual " + yr, J.atual, RAW.vendas.atual, RAW.leads.atual, false), linha("Mês anterior", J.mom, RAW.vendas.mom, RAW.leads.mom, true), linha("Mesmo período " + J.yoy.ini.slice(0,4), J.yoy, RAW.vendas.yoy, RAW.leads.yoy, true)]);
   }
 
   function renderS7B(){
@@ -791,7 +898,6 @@
 
   function renderPendentes(){
     const bl = {
-      engajamento: ["2 Engajados — composição Data Core × Anne, por produto, ativos 7 dias, limitações do sinal de grupo", "3 Engajados não matriculados — por concurso + exportação nominal (confidencial)", "Ref. A Segmentação por estrela — PRF e por concurso (snapshot diário)"],
       comercial: ["9A Produtividade do time humano (ligações, recebidos, devolvidos, matriculados)", "9B Leads da Anne fora do pipeline (ia / dormant / human / opted_out × 6+ e 10+ msgs)", "9C Quem assume, engaja e converte (escalations.claimed_by)", "Ref. B Motivos de perda"],
       financeiro: ["11 Gasto Meta Ads, CAC (piso), ROAS, CPL — com a ressalva de cobertura de UTM", "11 Disparos: campanhas, enviadas, taxa de resposta, vendas até 10 dias após (correlação, não causa)"],
     };
