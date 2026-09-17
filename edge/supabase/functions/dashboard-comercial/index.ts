@@ -96,13 +96,14 @@ Deno.serve(async (req: Request) => {
       mom: { ini: addMonths(ini, -1), fim: addMonths(fim, -1) },
       yoy: { ini: addMonths(ini, -12), fim: addMonths(fim, -12) },
     };
-    const [vAtual, vMom, vYoy, metas, cfg, anneData] = await Promise.all([
+    const [vAtual, vMom, vYoy, metas, cfg, anneData, cupons] = await Promise.all([
       vendas(db, janelas.atual.ini, janelas.atual.fim, superior, contest),
       vendas(db, janelas.mom.ini, janelas.mom.fim, superior, contest),
       vendas(db, janelas.yoy.ini, janelas.yoy.fim, superior, contest),
       db.from("comercial_metas").select("mes, chave, valor").gte("mes", addMonths(mes, -1)).lte("mes", mes),
       db.from("comercial_produto_categoria").select("product_hubla_id, categoria, nome_canonico, validado").eq("validado", false),
       anne(ini, fim),
+      db.rpc("fn_comercial_cupons_90d", { p_fim: fim }),
     ]);
     if (metas.error) throw new Error(metas.error.message);
 
@@ -111,6 +112,7 @@ Deno.serve(async (req: Request) => {
       hoje, filtros: { ini, fim, superior, contest }, janelas,
       vendas: { atual: vAtual, mom: vMom, yoy: vYoy },
       metas: metas.data ?? [],
+      cupons_90d: cupons.error ? { error: cupons.error.message } : ((cupons.data as unknown[])?.[0] ?? null),
       avisos: {
         produtos_nao_validados: (cfg.data ?? []).length,
       },

@@ -16,11 +16,21 @@ Deno.serve(async (req: Request) => {
   if ((url.searchParams.get("k") ?? "") !== TOKEN) return json({ error: "unauthorized" }, 401);
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
   try {
-    const [conv, vend] = await Promise.all([
+    // janela em dia Manaus (-04): [ini 00:00, fim 23:59:59]
+    const ini = url.searchParams.get("ini") ?? "", fim = url.searchParams.get("fim") ?? "";
+    const okYmd = (x: string) => /^\d{4}-\d{2}-\d{2}$/.test(x);
+    const tIni = okYmd(ini) ? ini + "T04:00:00.000Z" : new Date(Date.now() - 45 * 86400e3).toISOString();
+    const tFim = okYmd(fim) ? new Date(Date.parse(fim + "T04:00:00.000Z") + 86400e3 - 1).toISOString() : new Date().toISOString();
+    const [conv, vend, sales] = await Promise.all([
       sb.from("conversations").select("status", { count: "exact", head: true }).eq("status", "humano_comercial"),
       sb.from("vendedores").select("id, nome, tipo, ativo").eq("ativo", true),
+      // atribuição oficial da Anne (seção 5): quando existe linha em sales, ela vence o código do utm_term
+      sb.from("sales").select("hubla_transaction_id, attribution, matched_by, agent_slug, paid_at, amount")
+        .gte("paid_at", tIni).lte("paid_at", tFim).range(0, 4999),
     ]);
     if (vend.error) throw new Error(vend.error.message);
-    return json({ generated_at: new Date().toISOString(), humano_comercial: conv.count ?? null, vendedores: vend.data ?? [] });
+    if (sales.error) throw new Error(sales.error.message);
+    return json({ generated_at: new Date().toISOString(), janela: { ini: tIni, fim: tFim },
+      humano_comercial: conv.count ?? null, vendedores: vend.data ?? [], sales: sales.data ?? [] });
   } catch (e) { return json({ error: String(e) }, 500); }
 });
