@@ -178,8 +178,36 @@
 
     <!-- ===== DEMANDA ===== -->
     <div class="page" id="p-demanda">
-      <div class="page-head"><h2>Geração de demanda</h2><p>Inscritos por canal de marketing (1.1), por evento/ação e concurso (1.2) e por produto (1.3).</p></div>
-      <div class="pending-card" id="pend-demanda"></div>
+      <div class="page-head"><h2>Geração de demanda</h2><p>Inscritos por canal de marketing (1.1), por evento/ação e concurso (1.2) e por produto (1.3). Inscrito = lead criado no período (dia-calendário Manaus), excluindo importações de base histórica.</p></div>
+      <div class="kpi-row" id="kpis-demanda"></div>
+
+      <section id="s1-1">
+        <div class="section-head"><div><span class="section-num">1.1</span> <h2>Inscritos por canal de marketing</h2></div><span class="section-sub">leads.first_utm_* + first_origin · exclui import_historico/import_hotmart · MoM no mesmo recorte de dias</span></div>
+        <div class="card"><div class="tablewrap" id="tab-s11"></div><p class="note" style="margin-top:10px" id="nota-s11"></p></div>
+        <div class="grid-2">
+          <div class="card"><h3>Evolução diária acumulada — Site (checkout blindado) × Pago (Meta Ads)</h3><div id="chart-s11" style="margin-top:8px"></div><div id="legend-s11" style="display:flex;gap:16px;font-size:11.5px;color:var(--ink-2);margin-top:8px;flex-wrap:wrap"></div></div>
+          <div class="card"><div class="finding" style="margin:0" id="finding-s11"></div></div>
+        </div>
+      </section>
+
+      <section id="s1-2">
+        <div class="section-head"><div><span class="section-num">1.2</span> <h2>Inscritos por evento/ação, por concurso</h2></div><span class="section-sub">leads.first_utm_campaign / first_origin + vínculo lead→concurso (lead_interests ∪ webinar_events)</span></div>
+        <div class="card">
+          <div class="finding"><b>Definições confirmadas pela Head:</b> <b>Direct Response</b> = anúncio → vídeo de venda (VSL) → oferta no fim (sinal real: <code>utm_campaign</code> contém "VSL"). <b>Venda Direta</b> = anúncio com link direto para a página de venda (tráfego pago sem VSL). <b>Webinário</b> (SOU Webinário / HotWebinar) e <b>Estude Comigo</b> (aula no YouTube → captura → grupo WhatsApp → nutrição Anne → Elite) foram descobertos rodando e não estavam na lista original. <b>Site direto</b> = tráfego orgânico para o checkout blindado sem campanha paga — não é Venda Direta (sempre paga) nem Webinário. Classificador excludente nesta ordem: Webinário → Estude Comigo → Lançamento → Direct Response → Venda Direta → Site direto → Não mapeado; sem join com <code>funnels</code>. <code>[VD]</code> no nome da campanha <b>não</b> significa Venda Direta.</div>
+          <div class="tablewrap" style="margin-top:14px" id="tab-s12"></div>
+          <div class="finding crit" style="margin-top:12px" id="finding-vsl"></div>
+          <p class="note" style="margin-top:12px" id="nota-s12"></p>
+        </div>
+      </section>
+
+      <section id="s1-3">
+        <div class="section-head"><div><span class="section-num">1.3</span> <h2>Inscritos por produto (concurso)</h2></div><span class="section-sub">coalesce(lead_interests.contest_id, webinar_events.contest_id) — o fallback via webinário é essencial (leads "souwebinario" não têm UTM nem lead_interests)</span></div>
+        <div class="card">
+          <div class="finding"><b>Por que esta seção é "por concurso" e não "produto sinalizado":</b> não existe dado de produto/plano de interesse antes da compra — <code>lead_interests</code> guarda só o concurso e a pesquisa é respondida depois, na entrada do grupo/webinário. Para ressuscitar a versão original é preciso instrumentar uma pergunta de "produto de interesse" no cadastro (trabalho de produto, não de dado).</div>
+          <div class="tablewrap" style="margin-top:14px" id="tab-s13"></div>
+          <p class="note" style="margin-top:10px" id="nota-s13"></p>
+        </div>
+      </section>
     </div>
 
     <!-- ===== ENGAJAMENTO ===== -->
@@ -203,7 +231,7 @@
       </section>
 
       <section id="s6">
-        <div class="section-head"><div><span class="section-num">06</span> <h2>Visão geral do funil — Inscritos → Engajados → Matriculados</h2></div><span class="section-sub">matrícula = venda nova real · inscritos e engajados entram nas fases 3 e 4</span></div>
+        <div class="section-head"><div><span class="section-num">06</span> <h2>Visão geral do funil — Inscritos → Engajados → Matriculados</h2></div><span class="section-sub">inscritos = leads do período · engajados = sinais do Data Core (pesquisa, grupo, webinário, score) — a união com a Anne entra na fase 4 · matrícula = venda nova real</span></div>
         <div class="card"><div class="tablewrap" id="tab-s6"></div>
           <div class="finding crit" style="margin-top:12px"><b>Ressalva herdada do protótipo:</b> em agosto/26, 167 dos 238 matriculados tinham <code>first_origin = 'hubla'</code> — o lead só foi criado no momento da compra, nunca passou por "inscrito"/"engajado". Isso infla a taxa Engajado→Matriculado do mês anterior (o protótipo mostrou 192%). <b>A leitura confiável é Inscrito→Engajado</b>, e mesmo ela pode refletir mudança de captura (webinar_events/survey_answers passaram a registrar mais em setembro) — confirmar com o time técnico antes de comemorar o salto.</div></div>
       </section>
@@ -275,7 +303,7 @@
   const K = new URLSearchParams(location.search).get("k") || "";
   const PAGES = [
     {id:"visao", label:"Visão executiva", ic:"🏠"},
-    {id:"demanda", label:"Demanda", ic:"📥", tag:"fase 3"},
+    {id:"demanda", label:"Demanda", ic:"📥"},
     {id:"engajamento", label:"Engajamento", ic:"🔥", tag:"fase 4"},
     {id:"receita", label:"Receita", ic:"💰"},
     {id:"comercial", label:"Time comercial", ic:"☎️", tag:"fase 5"},
@@ -363,7 +391,8 @@
     try { renderKpis(); } catch(e){ $("kpis").innerHTML = `<div class="finding crit">KPIs indisponíveis: ${esc(e.message)}</div>`; }
     try { renderAvisos(); } catch(e){ $("avisos").innerHTML = `<div class="aviso">avisos indisponíveis: ${esc(e.message)}</div>`; }
     try { renderCategorias(); } catch(e){ $("tab-categorias").innerHTML = `<p class="note">ritmo indisponível: ${esc(e.message)}</p>`; }
-    for (const [fn, id] of [[renderS4, "tab-s4"], [renderS5, "tab-s5"], [renderS6, "tab-s6"], [renderS7B, "tab-s7b"], [renderS8, "tab-s8"], [renderS10, "cards-s10"]]){
+    try { renderContestSelect(); } catch(e){ console.error(e); }
+    for (const [fn, id] of [[renderKpisDemanda, "kpis-demanda"], [renderS11, "tab-s11"], [renderS12, "tab-s12"], [renderS13, "tab-s13"], [renderS4, "tab-s4"], [renderS5, "tab-s5"], [renderS6, "tab-s6"], [renderS7B, "tab-s7b"], [renderS8, "tab-s8"], [renderS10, "cards-s10"]]){
       try { fn(); } catch(e){ $(id).innerHTML = `<p class="note crit">seção indisponível: ${esc(e.message)}</p>`; console.error(fn.name, e); }
     }
     try { renderComercial(); } catch(e){ $("kpis-comercial").innerHTML = ""; }
@@ -378,7 +407,7 @@
     const j = janela(); $("f-ini").value = j.ini; $("f-fim").value = j.fim;
     const custom = state.periodo === "custom";
     $("f-ini").style.display = $("f-fim").style.display = custom ? "" : "none";
-    const sup = state.superior === "1" ? " · Filtro de ensino superior ativo: as seções de leads passam a considerar só leads com escolaridade superior (entra na fase 3)." : "";
+    const sup = state.superior === "1" ? " · Só leads com escolaridade superior completa ou pós (pesquisa → eventos de campanha → cadastro); leads sem escolaridade conhecida ficam de fora." : "";
     $("filter-desc").textContent = "Período " + dmy(j.ini) + " – " + dmy(j.fim) + " · " + FILTER_LABEL[state.modo] + sup;
   }
 
@@ -396,7 +425,7 @@
       <div class="kpi"><div class="l">${labelRec}</div><div class="v num">${fmtR(g.rev)}</div>${sub(g.rev, gy.rev, fmtR, lblY)}<div class="s2">${growth(g.rev, gm.rev) == null ? "" : fmtPct(growth(g.rev, gm.rev)) + " vs. " + lblM}</div></div>
       <div class="kpi"><div class="l">${labelFat}</div><div class="v num">${fmtN(g.qty)}</div>${sub(g.qty, gy.qty, fmtN, lblY)}<div class="s2">${growth(g.qty, gm.qty) == null ? "" : fmtPct(growth(g.qty, gm.qty)) + " vs. " + lblM}</div></div>
       <div class="kpi"><div class="l">Ticket médio</div><div class="v num">${fmtR(tk)}</div>${sub(tk, tky, fmtR, lblY)}<div class="s2">${growth(tk, tkm) == null ? "" : fmtPct(growth(tk, tkm)) + " vs. " + lblM}</div></div>
-      <div class="kpi"><div class="l">Inscritos reais no período</div><div class="v num muted">—</div><div class="s muted">entra na fase 3 (leads por dia-calendário Manaus, sem importações)</div></div>`;
+      <div class="kpi"><div class="l">Inscritos reais no período</div><div class="v num">${fmtN(RAW.leads.atual.length)}</div>${RAW.leads.mom.length ? `<div class="s ${cls(RAW.leads.atual.length - RAW.leads.mom.length)}">${fmtPct((RAW.leads.atual.length - RAW.leads.mom.length) / RAW.leads.mom.length * 100)} vs. ${lblM}</div>` : `<div class="s muted">sem comparável no mês anterior</div>`}<div class="s2">leads criados no período (dia Manaus), sem importações · ${RAW.filtros.superior ? "só ensino superior" : "todas as escolaridades"}</div></div>`;
 
     // achado do mês — gerado a partir dos números, nunca fixo
     const T = agregar(RAW.vendas.atual); // total sempre, p/ a composição
@@ -472,6 +501,121 @@
   }
 
 
+
+  /* ================= FASE 3 — DEMANDA ================= */
+  const CONTEST_LABEL = {TJAM:"TJ-AM", SEDUC_PA:"SEDUC-PA", seduc_amazonas:"SEDUC-AM", MANAUSPREV:"ManausPrev", ses_e_semsa_manaus:"SES/SEMSA Manaus", PRF:"PRF", PCAM:"Polícia Civil AM", policia_federal:"Polícia Federal", PCIVIL:"Polícias Civis (bucket genérico)", INSS:"INSS", SEMED:"SEMED", PMAM:"PM-AM", ministerio_publico_do_amazonas:"MP-AM", CBMAM:"CBM-AM", TCE_AM:"TCE-AM", SEFAZ_AM:"SEFAZ-AM", DETRAN_AM:"DETRAN-AM", ALEAM:"ALEAM", CMM:"CMM", carreiras_tribunais:"Carreiras Tribunais", GUARDA_MANAUS:"Guarda Municipal", PCPA:"PC-PA", PLAYPASSEI:"Play Passei"};
+  const cLabel = c => CONTEST_LABEL[c] || ((RAW.contests || []).find(x => x.code === c) || {}).name || c;
+  const ESC_LABEL = {superior_completo:"Superior completo", pos:"Pós-graduação", superior_cursando:"Superior cursando", medio:"Ensino médio", fundamental:"Fundamental", outro:"Outro"};
+  const ACOES = [["webinario","Webinário"],["estude_comigo","Estude Comigo"],["venda_direta","Venda Direta"],["site_direto","Site direto (orgânico)"],["direct_response","Direct Response"],["lancamento","Lançamento"],["outro_nao_mapeado","Não mapeado"]];
+  const LABELS_11 = [["ORGÂNICO", null], ["ig_delta","Instagram · @deltafabio"],["ig_scv","Instagram · @souconcurseiro"],["playpassei","Instagram/Site · @playpassei"],["yt_scv","YouTube · Sou Concurseiro"],["yt_ef","YouTube · Elite Federal"],["blindado","Site · checkout blindado"],["blog","Site · blog"],["PAGO", null],["pago","Meta Ads (Feed + Stories + Reels)"]];
+
+  function renderKpisDemanda(){
+    const L = RAW.leads.atual, M = RAW.leads.mom, Y = RAW.leads.yoy;
+    const escConhecida = L.filter(r => r.escolaridade).length, sup = L.filter(r => r.superior === true).length;
+    const gr = (a, b) => b > 0 ? `<div class="s ${cls((a - b) / b)}">${fmtPct((a - b) / b * 100)} vs. mês anterior (${fmtN(b)})</div>` : `<div class="s muted">sem comparável no mês anterior</div>`;
+    const esc = {}; for (const r of L) esc[r.escolaridade || "(sem dado)"] = (esc[r.escolaridade || "(sem dado)"] || 0) + 1;
+    $("kpis-demanda").innerHTML = `
+      <div class="kpi"><div class="l">Inscritos reais no período</div><div class="v num">${fmtN(L.length)}</div>${gr(L.length, M.length)}<div class="s2">${Y.length ? fmtN(Y.length) + " no mesmo período do ano anterior" : "sem leads rastreados no mesmo período do ano anterior"}</div></div>
+      <div class="kpi"><div class="l">Com concurso vinculado</div><div class="v num">${fmtN(L.filter(r => r.n_contests > 0).length)}</div><div class="s muted">${fmtN(L.filter(r => r.n_contests === 0).length)} sem concurso · ${fmtN(L.filter(r => r.n_contests > 1).length)} com interesse múltiplo</div></div>
+      <div class="kpi"><div class="l">Escolaridade conhecida</div><div class="v num">${pctTxt(escConhecida, L.length)}</div><div class="s muted">${fmtN(escConhecida)} de ${fmtN(L.length)} · superior completo/pós: ${fmtN(sup)}</div><div class="s2">${Object.entries(esc).filter(([k]) => k !== "(sem dado)").sort((a, b) => b[1] - a[1]).map(([k, n]) => (ESC_LABEL[k] || k) + " " + n).join(" · ")}</div></div>
+      <div class="kpi"><div class="l">Já matriculados (venda nova até o fim do período)</div><div class="v num">${fmtN(L.filter(r => r.matriculado).length)}</div><div class="s muted">${pctTxt(L.filter(r => r.matriculado).length, L.length)} dos inscritos do período</div></div>`;
+  }
+
+  function renderS11(){
+    const L = RAW.leads.atual, M = RAW.leads.mom, metas = metasMes();
+    const cnt = rows => { const g = {}; for (const r of rows) if (r.label_11) g[r.label_11] = (g[r.label_11] || 0) + 1; return g; };
+    const a = cnt(L), m = cnt(M);
+    const linhas = [], csv = []; let totA = 0, totM = 0, totMeta = 0, allSet = true;
+    for (const [k, nome] of LABELS_11){
+      if (!nome){ linhas.push(`<tr class="group"><td colspan="6" style="background:var(--surface-2);font-weight:600;color:var(--ink);font-family:'IBM Plex Sans'">${k}</td></tr>`); continue; }
+      const va = a[k] || 0, vm = m[k] || 0, meta = metas[k] || 0; totA += va; totM += vm; if (meta) totMeta += meta; else allSet = false;
+      const g = vm > 0 ? (va - vm) / vm * 100 : null; const pct = meta > 0 ? va / meta : null; const st = pct != null ? statusFor(pct) : null;
+      linhas.push(`<tr><td class="rowlabel">${nome}</td><td><input class="meta-input" type="number" data-meta="${k}" value="${meta || ""}" placeholder="0"></td>
+        <td class="num ${va ? "" : "muted"}">${fmtN(va)}</td><td class="num ${vm ? "" : "muted"}">${fmtN(vm)}</td>
+        <td class="num ${g == null ? (va ? "good" : "muted") : cls(g)}">${g == null ? (va ? "novo" : "—") : fmtPct(g)}</td>
+        <td class="num">${pct != null ? Math.round(pct * 100) + "% <span class='pill " + st.cls + "'>" + st.label + "</span>" : "<span class='pill neutral'>defina a meta</span>"}</td></tr>`);
+      csv.push([nome, meta || "", va, vm, g == null ? "" : g.toFixed(1)]);
+    }
+    const gT = totM > 0 ? (totA - totM) / totM * 100 : null, pctT = totMeta > 0 ? totA / totMeta : null, stT = pctT != null ? statusFor(pctT) : null;
+    linhas.push(`<tr class="total"><td class="rowlabel">TOTAL classificado (1.1)</td><td class="num">${totMeta ? fmtN(totMeta) + (allSet ? "" : " (parcial)") : "—"}</td><td class="num">${fmtN(totA)}</td><td class="num">${fmtN(totM)}</td><td class="num ${gT == null ? "muted" : cls(gT)}">${gT == null ? "—" : fmtPct(gT)}</td><td class="num">${pctT != null ? Math.round(pctT * 100) + "% <span class='pill " + stT.cls + "'>" + stT.label + "</span>" : "<span class='pill neutral'>—</span>"}</td></tr>`);
+    CSVS.s11_canal_marketing = {head:["Canal", "Meta", "Leads período", "Leads mês anterior", "Growth MoM %"], rows: csv};
+    const J = RAW.janelas;
+    $("tab-s11").innerHTML = `<table><thead><tr><th class="rowlabel">Canal</th><th>Meta do mês</th><th>Leads ${dm(J.atual.ini)}–${dm(J.atual.fim)}</th><th>Leads ${dm(J.mom.ini)}–${dm(J.mom.fim)}*</th><th>Growth MoM</th><th>% Atingimento</th></tr></thead><tbody>${linhas.join("")}</tbody></table>` + csvBtn(null, "s11_canal_marketing");
+    document.querySelectorAll("#tab-s11 input[data-meta]").forEach(inp => inp.addEventListener("change", () => salvarMeta(inp.dataset.meta, inp.value)));
+    const fora = L.length - totA;
+    $("nota-s11").innerHTML = `*Mesmo recorte de dias no mês anterior, MoM comparável. Os 8 canais cobrem <b>${fmtN(totA)} de ${fmtN(L.length)}</b> inscritos do período; os outros ${fmtN(fora)} entram pelo webinário (SOU Webinário), pela Anne (WhatsApp inbound), pelo checkout da Hubla ou por origens sem canal de marketing — aparecem nas seções 1.2 e 1.3. Tabela e gráfico saem da mesma consulta.`;
+    // gráfico acumulado (mesma query): blindado × pago
+    const dias = []; for (let d = J.atual.ini; d <= J.atual.fim; d = addDays(d, 1)) dias.push(d);
+    const serie = k => { let acc = 0; return dias.map(d => acc += L.filter(r => r.dia === d && r.label_11 === k).length); };
+    const sB = serie("blindado"), sP = serie("pago"), max = Math.max(1, sB[sB.length - 1], sP[sP.length - 1]);
+    const W = 620, H = 190, x0 = 46, x1 = 600, yB = 160, yT = 20;
+    const px = i => dias.length > 1 ? x0 + (x1 - x0) * i / (dias.length - 1) : x0, py = v => yB - (v / max) * (yB - yT);
+    const path = sr => "M" + sr.map((v, i) => `${px(i).toFixed(1)},${py(v).toFixed(1)}`).join(" L");
+    $("chart-s11").innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto" aria-label="Leads acumulados por dia, checkout blindado vs pago">
+      <line x1="${x0}" y1="${yB}" x2="${x1}" y2="${yB}" stroke="var(--border)"/><line x1="${x0}" y1="${yT}" x2="${x0}" y2="${yB}" stroke="var(--border)"/>
+      <text x="${x0 - 4}" y="${yT - 2}" font-size="9" fill="var(--ink-muted)" font-family="IBM Plex Mono" text-anchor="end">${max}</text>
+      <text x="${x0 - 4}" y="${yB + 4}" font-size="9" fill="var(--ink-muted)" font-family="IBM Plex Mono" text-anchor="end">0</text>
+      <text x="${x0}" y="${yB + 16}" font-size="9" fill="var(--ink-muted)" font-family="IBM Plex Mono">${dm(dias[0])}</text>
+      <text x="${x1}" y="${yB + 16}" font-size="9" fill="var(--ink-muted)" font-family="IBM Plex Mono" text-anchor="end">${dm(dias[dias.length - 1])}</text>
+      <path d="${path(sB)}" fill="none" stroke="var(--accent)" stroke-width="2.5"/><path d="${path(sP)}" fill="none" stroke="var(--gold)" stroke-width="2.5"/></svg>`;
+    $("legend-s11").innerHTML = `<span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--accent);margin-right:5px"></span>Site — checkout blindado (acumulado: ${fmtN(sB[sB.length - 1])})</span><span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--gold);margin-right:5px"></span>Pago — Meta Ads (acumulado: ${fmtN(sP[sP.length - 1])})</span>`;
+    // achado gerado: ritmo diário na 1ª × 2ª metade do período
+    const meio = Math.floor(dias.length / 2) || 1;
+    const rit = (sr, a, b) => (sr[b - 1] - (a ? sr[a - 1] : 0)) / Math.max(b - a, 1);
+    const p1 = rit(sP, 0, meio), p2 = rit(sP, meio, dias.length), b1 = rit(sB, 0, meio), b2 = rit(sB, meio, dias.length);
+    $("finding-s11").innerHTML = `<b>Ritmo diário de leads pagos:</b> ${p1.toFixed(1).replace(".", ",")}/dia na primeira metade do período → ${p2.toFixed(1).replace(".", ",")}/dia na segunda${p2 > p1 * 1.5 ? " — <b>acelerou</b>" : p2 < p1 * 0.67 ? " — <b>desacelerou</b>" : " — estável"}. Checkout blindado: ${b1.toFixed(1).replace(".", ",")}/dia → ${b2.toFixed(1).replace(".", ",")}/dia. Cruze com o calendário de webinários/Estude Comigo (seção 1.2) antes de atribuir a mudança a criativo ou verba.`;
+  }
+
+  function renderS12(){
+    const L = RAW.leads.atual;
+    const g = {}, semC = {}; let totSem = 0;
+    for (const r of L){ if (r.n_contests === 0){ semC[r.acao] = (semC[r.acao] || 0) + 1; totSem++; continue; } for (const c of r.contests){ (g[c] = g[c] || {}); g[c][r.acao] = (g[c][r.acao] || 0) + 1; } }
+    const tot = o => Object.values(o).reduce((a, b) => a + b, 0);
+    const lista = Object.entries(g).sort((a, b) => tot(b[1]) - tot(a[1]));
+    const principais = lista.slice(0, 9), outros = lista.slice(9);
+    const outrosAgg = {}; for (const [, o] of outros) for (const k in o) outrosAgg[k] = (outrosAgg[k] || 0) + o[k];
+    const linha = (nome, o) => [nome, ...ACOES.map(([k]) => ({html: o[k] ? fmtN(o[k]) : "<span class='muted'>0</span>", raw: o[k] || 0})), tot(o)];
+    const rows = principais.map(([c, o]) => linha(cLabel(c), o));
+    if (outros.length) rows.push(linha(`Outros concursos (${outros.length})`, outrosAgg));
+    rows.push(linha("Sem concurso vinculado", semC));
+    const totAll = {}; for (const r of L) totAll[r.acao] = (totAll[r.acao] || 0) + 1;
+    $("tab-s12").innerHTML = tabela("s12_evento_concurso", ["Concurso", ...ACOES.map(([, n]) => n), "Total"], rows,
+      {total:[{html:"TOTAL (leads únicos)", raw:"TOTAL"}, ...ACOES.map(([k]) => ({html:fmtN(totAll[k] || 0), raw:totAll[k] || 0})), {html:fmtN(L.length), raw:L.length}]});
+    // alerta VSL: gasto Meta em campanhas VSL × leads Direct Response
+    const vsl = (RAW.meta_spend || []).filter(r => /VSL/i.test(r.campaign_name || ""));
+    const spend = vsl.reduce((a, r) => a + (Number(r.spend) || 0), 0), clicks = vsl.reduce((a, r) => a + (Number(r.clicks) || 0), 0);
+    const camps = [...new Set(vsl.map(r => r.campaign_name))], contas = [...new Set(vsl.map(r => r.ad_account_name))];
+    const dr = totAll.direct_response || 0;
+    const el = $("finding-vsl");
+    if (spend > 0 && dr === 0){
+      el.style.display = ""; el.innerHTML = `<b>Gap de tracking: há campanha de VSL rodando na Meta, mas nenhum lead rastreável como Direct Response.</b> ${camps.length} campanha(s) com "VSL" no nome (conta ${contas.map(esc).join(", ")}): <b>${fmtR2(spend)} investidos e ${fmtN(clicks)} cliques</b> no período — e <b>zero leads</b> com "VSL" na campanha de entrada no Data Core. Leitura mais provável: a landing da VSL manda o clique para o WhatsApp sem propagar UTM/fbclid para o link <code>wa.me</code>. É ajuste técnico na LP, não erro de classificação — "Direct Response = 0" aqui é cegueira de dado, não ausência de campanha. Campanhas: ${camps.map(c => "<span class='mono'>" + esc(c) + "</span>").join(" · ")}.`;
+    } else if (spend > 0){
+      el.style.display = ""; el.className = "finding"; el.innerHTML = `Campanhas de VSL na Meta: ${fmtR2(spend)} / ${fmtN(clicks)} cliques no período → ${fmtN(dr)} leads Direct Response rastreados.`;
+    } else { el.style.display = "none"; }
+    const nm = totAll.outro_nao_mapeado || 0;
+    const origNM = {}; for (const r of L) if (r.acao === "outro_nao_mapeado") origNM[r.first_origin || "(sem origem)"] = (origNM[r.first_origin || "(sem origem)"] || 0) + 1;
+    $("nota-s12").innerHTML = `"Site direto" é tráfego orgânico para o checkout blindado ou redirecionamento da Anne sem campanha paga. O residual "Não mapeado" (${fmtN(nm)} leads) vem de: ${Object.entries(origNM).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k, n]) => "<code>" + esc(k) + "</code> " + n).join(", ")} — origens que não são evento de marketing (WhatsApp inbound da Anne, compra direta na Hubla). Leads com mais de um concurso aparecem em cada linha (a coluna Total soma por concurso; a linha TOTAL conta leads únicos).`;
+  }
+
+  function renderS13(){
+    const L = RAW.leads.atual;
+    const g = {}; let multi = 0, sem = 0;
+    for (const r of L){ if (r.n_contests === 0){ sem++; continue; } if (r.n_contests > 1) multi++; for (const c of r.contests) g[c] = (g[c] || 0) + 1; }
+    const lista = Object.entries(g).sort((a, b) => b[1] - a[1]);
+    const somaLinhas = lista.reduce((a, [, n]) => a + n, 0), comC = L.length - sem;
+    const rows = lista.map(([c, n]) => [cLabel(c) + (c === "PCIVIL" || c === "ses_e_semsa_manaus" ? " — bucket amplo, ver nota" : ""), n, pctTxt(n, L.length)]);
+    rows.push([{html:"<span class='crit'>Sem concurso vinculado</span>", raw:"Sem concurso vinculado"}, {html:"<span class='crit'>" + fmtN(sem) + "</span>", raw:sem}, pctTxt(sem, L.length)]);
+    $("tab-s13").innerHTML = tabela("s13_por_concurso", ["Concurso / produto", "Leads", "% dos inscritos"], rows, {total:[{html:"TOTAL (leads únicos)", raw:"TOTAL"}, {html:fmtN(L.length), raw:L.length}, {html:"100%", raw:"100%"}]});
+    $("nota-s13").innerHTML = `<b>${fmtN(multi)} leads (${pctTxt(multi, L.length)}) têm mais de um concurso vinculado</b> — por isso a soma das linhas (${fmtN(somaLinhas)}) é maior que o total de leads únicos com concurso (${fmtN(comC)}). <b>"Polícias Civis" e "SES e SEMSA Manaus" são buckets amplos e dispersos</b> (misturam Guarda Municipal, SEMED, TJ-AM, ALEAM) — não tratar como produto único sem validar com o comercial. De-para concurso → produto de venda confirmado em <code>orders_elite</code>: TJ-AM → ELITE TRIBUNAL DE JUSTIÇA DO AMAZONAS · PRF → ELITE PRF · ManausPrev → ELITE MANAUS PREV; SEDUC-PA e SEDUC-AM confirmados só pelo nome do produto Hubla.`;
+  }
+
+  function renderContestSelect(){
+    const sel = $("f-contest"); const cur = state.contest;
+    const usados = new Set(); for (const r of RAW.leads.atual) for (const c of r.contests) usados.add(c);
+    const opts = (RAW.contests || []).filter(c => usados.has(c.code) || c.code === cur).map(c => `<option value="${esc(c.code)}">${esc(cLabel(c.code))}</option>`).join("");
+    sel.innerHTML = `<option value="">Todos</option>` + opts; sel.value = cur || "";
+  }
+
   /* ================= FASE 2 — RECEITA ================= */
   const MODO_LABEL = {total:"todas as faturas pagas (venda nova + parcela)", nova:"só vendas novas", parcela:"só parcelas"};
   const rowsModo = rows => (rows || []).filter(r => state.modo === "total" || r.tipo_fatura === state.modo);
@@ -540,9 +684,10 @@
   function renderS6(){
     const J = RAW.janelas, yr = J.atual.ini.slice(0,4);
     const mat = rows => rows.filter(r => r.tipo_fatura === "nova").length;
-    const linha = (lbl, j, rows) => [lbl + " (" + dm(j.ini) + "–" + dm(j.fim) + ")", {html:"<span class='pill build'>fase 3</span>", raw:""}, {html:"<span class='pill build'>fase 4</span>", raw:""}, mat(rows), {html:"—", raw:""}, {html:"—", raw:""}];
+    const eng = ls => ls.filter(r => r.sig_score || r.sig_survey || r.sig_grupo || r.sig_webinar).length;
+    const linha = (lbl, j, rows, ls) => { const i = ls.length, e = eng(ls), m = mat(rows); return [lbl + " (" + dm(j.ini) + "–" + dm(j.fim) + ")", i, {html: fmtN(e) + " <span class='pill build' title='só sinais do Data Core; a Anne entra na fase 4'>parcial</span>", raw:e}, m, {html: i ? pctTxt(e, i) : "—", raw: i ? (e / i * 100).toFixed(1) : ""}, {html: e ? pctTxt(m, e) : "—", raw: e ? (m / e * 100).toFixed(1) : ""}]; };
     $("tab-s6").innerHTML = tabela("s6_funil", ["Período", "Inscritos", "Engajados", "Matriculados (venda nova)", "Insc→Eng", "Eng→Mat"], [
-      linha("Atual " + yr, J.atual, RAW.vendas.atual), linha("Mês anterior", J.mom, RAW.vendas.mom), linha("Mesmo período " + J.yoy.ini.slice(0,4), J.yoy, RAW.vendas.yoy)]);
+      linha("Atual " + yr, J.atual, RAW.vendas.atual, RAW.leads.atual), linha("Mês anterior", J.mom, RAW.vendas.mom, RAW.leads.mom), linha("Mesmo período " + J.yoy.ini.slice(0,4), J.yoy, RAW.vendas.yoy, RAW.leads.yoy)]);
   }
 
   function renderS7B(){
@@ -646,7 +791,6 @@
 
   function renderPendentes(){
     const bl = {
-      demanda: ["1.1 Inscritos por canal de marketing — 8 canais fixos, meta, MoM, % atingimento e gráfico acumulado (mesma query)", "1.2 Inscritos por evento/ação × concurso — Webinário · Estude Comigo · Venda Direta · Site direto · Direct Response · Lançamento · Não mapeado + alerta do gap de tracking da VSL PlayPassei", "1.3 Inscritos por produto — com 'sem concurso vinculado' e interesse múltiplo"],
       engajamento: ["2 Engajados — composição Data Core × Anne, por produto, ativos 7 dias, limitações do sinal de grupo", "3 Engajados não matriculados — por concurso + exportação nominal (confidencial)", "Ref. A Segmentação por estrela — PRF e por concurso (snapshot diário)"],
       comercial: ["9A Produtividade do time humano (ligações, recebidos, devolvidos, matriculados)", "9B Leads da Anne fora do pipeline (ia / dormant / human / opted_out × 6+ e 10+ msgs)", "9C Quem assume, engaja e converte (escalations.claimed_by)", "Ref. B Motivos de perda"],
       financeiro: ["11 Gasto Meta Ads, CAC (piso), ROAS, CPL — com a ressalva de cobertura de UTM", "11 Disparos: campanhas, enviadas, taxa de resposta, vendas até 10 dias após (correlação, não causa)"],

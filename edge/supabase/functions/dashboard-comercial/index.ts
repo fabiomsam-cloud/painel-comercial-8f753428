@@ -46,6 +46,13 @@ async function vendas(db: SupabaseClient, ini: string, fim: string, superior: bo
     db.rpc("fn_comercial_vendas", { p_ini: ini, p_fim: fim, p_superior: superior, p_contest: contest }).range(a, b));
 }
 
+async function leads(db: SupabaseClient, ini: string, fim: string, superior: boolean, contest: string | null) {
+  return await fetchAll((a, b) =>
+    db.rpc("fn_comercial_leads", { p_ini: ini, p_fim: fim, p_superior: superior, p_contest: contest, p_export: false })
+      .select("lead_id, dia, first_origin, canal, subcanal, label_11, acao, contests, n_contests, escolaridade, superior, sig_score, sig_survey, sig_grupo, sig_webinar, sig_pitch, ativo_webinar_7d, ativo_grupo_7d, matriculado")
+      .range(a, b));
+}
+
 async function anne(ini: string, fim: string) {
   try {
     const r = await fetch(`${ANNE_URL}?k=${TOKEN}&ini=${ini}&fim=${fim}`);
@@ -96,7 +103,7 @@ Deno.serve(async (req: Request) => {
       mom: { ini: addMonths(ini, -1), fim: addMonths(fim, -1) },
       yoy: { ini: addMonths(ini, -12), fim: addMonths(fim, -12) },
     };
-    const [vAtual, vMom, vYoy, metas, cfg, anneData, cupons] = await Promise.all([
+    const [vAtual, vMom, vYoy, metas, cfg, anneData, cupons, lAtual, lMom, lYoy, contests, meta] = await Promise.all([
       vendas(db, janelas.atual.ini, janelas.atual.fim, superior, contest),
       vendas(db, janelas.mom.ini, janelas.mom.fim, superior, contest),
       vendas(db, janelas.yoy.ini, janelas.yoy.fim, superior, contest),
@@ -104,6 +111,11 @@ Deno.serve(async (req: Request) => {
       db.from("comercial_produto_categoria").select("product_hubla_id, categoria, nome_canonico, validado").eq("validado", false),
       anne(ini, fim),
       db.rpc("fn_comercial_cupons_90d", { p_fim: fim }),
+      leads(db, janelas.atual.ini, janelas.atual.fim, superior, contest),
+      leads(db, janelas.mom.ini, janelas.mom.fim, superior, contest),
+      leads(db, janelas.yoy.ini, janelas.yoy.fim, superior, contest),
+      db.from("contests").select("code, name").order("name"),
+      fetchAll((a, b) => db.rpc("fn_comercial_meta_spend", { p_ini: ini, p_fim: fim }).range(a, b)),
     ]);
     if (metas.error) throw new Error(metas.error.message);
 
@@ -111,6 +123,9 @@ Deno.serve(async (req: Request) => {
       generated_at: new Date().toISOString(),
       hoje, filtros: { ini, fim, superior, contest }, janelas,
       vendas: { atual: vAtual, mom: vMom, yoy: vYoy },
+      leads: { atual: lAtual, mom: lMom, yoy: lYoy },
+      contests: contests.data ?? [],
+      meta_spend: meta,
       metas: metas.data ?? [],
       cupons_90d: cupons.error ? { error: cupons.error.message } : ((cupons.data as unknown[])?.[0] ?? null),
       avisos: {
