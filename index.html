@@ -41,7 +41,7 @@
   a{color:var(--accent)}
 
   /* ---- shell: sidebar + topbar ---- */
-  .shell{display:grid;grid-template-columns:var(--side) 1fr;min-height:100vh}
+  .shell{display:grid;grid-template-columns:var(--side) minmax(0,1fr);min-height:100vh}
   aside{background:var(--surface);border-right:1px solid var(--border);padding:18px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:6px}
   .brand{padding:4px 8px 14px;border-bottom:2px solid var(--ink);margin-bottom:8px}
   .brand .eyebrow{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:700}
@@ -53,7 +53,7 @@
   .nav a .tag{margin-left:auto;font-family:"IBM Plex Mono";font-size:9.5px;padding:1px 6px;border-radius:99px;background:var(--surface-3);color:var(--ink-muted)}
   .nav a.on .tag{background:rgba(255,255,255,.2);color:var(--accent-ink)}
   aside .foot{margin-top:auto;font-size:11px;color:var(--ink-muted);line-height:1.6;padding:8px}
-  main{padding:18px 26px 70px;max-width:1280px;width:100%}
+  main{padding:18px 26px 70px;max-width:1280px;width:100%;min-width:0;overflow-x:hidden}
 
   .topbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;box-shadow:var(--shadow);position:sticky;top:10px;z-index:5}
   .flabel{font-size:11px;color:var(--ink-muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-right:2px}
@@ -107,7 +107,7 @@
   tr.total td{font-weight:700;color:var(--ink);border-top:2px solid var(--ink);border-bottom:none}
   tr:hover td{background:var(--surface-2)}
   .rowlabel{font-family:"IBM Plex Sans";font-weight:500;color:var(--ink);text-align:left!important}
-  .tablewrap{overflow-x:auto}
+  .tablewrap{overflow-x:auto;max-width:100%}
   .meta-input{font-family:"IBM Plex Mono";font-size:12.5px;text-align:right;width:96px;border:1px solid var(--gold);border-radius:6px;padding:4px 7px;background:var(--gold-soft);color:var(--ink)}
   .meta-input:focus{outline:2px solid var(--accent);outline-offset:1px;background:var(--surface)}
   .pending-card{background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius);padding:18px 20px;color:var(--ink-muted);font-size:13px;line-height:1.6}
