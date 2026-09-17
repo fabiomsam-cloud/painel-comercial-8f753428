@@ -116,6 +116,37 @@ Deno.serve(async (req: Request) => {
     } catch (e) { return json({ error: String(e) }, 500); }
   }
 
+  // ---- CONFIG: de-paras editáveis (produto→categoria/concurso, código utm_term→vendedor). GET lista · POST atualiza e devolve a lista ----
+  if (url.searchParams.get("resource") === "config") {
+    try {
+      if (req.method === "POST") {
+        const b = await req.json().catch(() => ({}));
+        const por = String(b?.por ?? "").slice(0, 80);
+        if (b?.tipo === "produto") {
+          const id = String(b?.product_hubla_id ?? ""); if (!id) return json({ error: "id_obrigatorio" }, 400);
+          const categoria = String(b?.categoria ?? ""); if (!["elite", "upsell", "recorrente", "outros"].includes(categoria)) return json({ error: "categoria_invalida" }, 400);
+          const contest = b?.contest_code ? String(b.contest_code).slice(0, 60) : null;
+          const { error } = await db.from("comercial_produto_categoria")
+            .update({ categoria, contest_code: contest, validado: !!b?.validado, origem: "manual:" + por, updated_at: new Date().toISOString() }).eq("product_hubla_id", id);
+          if (error) return json({ error: error.message }, 400);
+        } else if (b?.tipo === "codigo") {
+          const codigo = String(b?.codigo ?? "").toLowerCase().trim().slice(0, 60); if (!codigo) return json({ error: "codigo_obrigatorio" }, 400);
+          const tipoCod = String(b?.tipo_codigo ?? ""); if (!["vendedor", "cs", "ia", "marketing", "disparo", "site"].includes(tipoCod)) return json({ error: "tipo_invalido" }, 400);
+          const { error } = await db.from("comercial_vendedor_codigo")
+            .upsert({ codigo, nome: b?.nome ? String(b.nome).slice(0, 80) : null, tipo: tipoCod, validado: !!b?.validado, updated_at: new Date().toISOString() });
+          if (error) return json({ error: error.message }, 400);
+        } else return json({ error: "tipo_invalido" }, 400);
+      }
+      const [prod, cod, cont] = await Promise.all([
+        fetchAll((a, b) => db.from("comercial_produto_categoria").select("product_hubla_id, product_name, categoria, nome_canonico, contest_code, origem, validado, updated_at").order("product_name").range(a, b)),
+        db.from("comercial_vendedor_codigo").select("codigo, nome, tipo, validado, updated_at").order("tipo").order("codigo"),
+        db.from("contests").select("code, name").order("name"),
+      ]);
+      if (cod.error) return json({ error: cod.error.message }, 500);
+      return json({ produtos: prod, codigos: cod.data ?? [], contests: cont.data ?? [] });
+    } catch (e) { return json({ error: String(e) }, 500); }
+  }
+
   // ---- METAS compartilhadas: GET lista do mês · POST {chave, valor, por} upsert e devolve a lista ----
   if (url.searchParams.get("resource") === "metas") {
     try {

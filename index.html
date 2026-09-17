@@ -342,12 +342,32 @@
         <p class="note" id="metas-nota"></p>
       </section>
       <section>
+        <div class="section-head"><div><span class="section-num">PRODUTOS</span> <h2>De-para produto Hubla → categoria e concurso</h2></div><span class="section-sub" id="cfg-prod-sub"></span></div>
+        <div class="card">
+          <p class="note">A categoria (Elite / Upsell / Recorrente / Outros) e o concurso de cada produto nascem de regra pelo nome e ficam como <b>não validados</b> até alguém confirmar aqui. Toda alteração vale para todas as telas na próxima atualização. Filtre pelo nome para achar o produto.</p>
+          <div style="display:flex;gap:10px;align-items:center;margin:10px 0;flex-wrap:wrap"><input id="cfg-prod-q" placeholder="filtrar produto…" style="font-family:inherit;font-size:12.5px;border:1px solid var(--border);border-radius:7px;padding:6px 9px;background:var(--surface);color:var(--ink);min-width:240px"><label class="note"><input type="checkbox" id="cfg-prod-nv"> só não validados</label><span class="note" id="cfg-prod-n"></span></div>
+          <div class="tablewrap" id="cfg-prod"></div>
+        </div>
+      </section>
+      <section>
+        <div class="section-head"><div><span class="section-num">CÓDIGOS</span> <h2>Códigos de venda (utm_term) → vendedor / CS / IA / marketing</h2></div></div>
+        <div class="card">
+          <p class="note">A seção 5 classifica cada venda pelo código gravado em <code>utm_term</code> no checkout da Hubla (a atribuição da Anne vence quando existe). Cadastre aqui o nome da pessoa e o tipo. Códigos que aparecem nas vendas mas não estão na lista entram como "Código não cadastrado".</p>
+          <div class="tablewrap" style="margin-top:10px" id="cfg-cod"></div>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap"><input id="cfg-cod-novo" placeholder="novo código (ex.: ana_is)" style="font-family:'IBM Plex Mono';font-size:12px;border:1px solid var(--border);border-radius:7px;padding:6px 9px;background:var(--surface);color:var(--ink)"><select id="cfg-cod-tipo" style="font-family:inherit;font-size:12.5px;border:1px solid var(--border);border-radius:7px;padding:6px;background:var(--surface);color:var(--ink)"><option value="vendedor">vendedor</option><option value="cs">cs</option><option value="ia">ia</option><option value="marketing">marketing</option><option value="disparo">disparo</option><option value="site">site</option></select><button class="btn" id="cfg-cod-add">+ Adicionar</button></div>
+        </div>
+      </section>
+      <section>
         <div class="section-head"><div><span class="section-num">GLOSSÁRIO</span> <h2>Definições em uso</h2></div></div>
         <div class="card note" style="line-height:1.7">
           <b>Venda nova</b> = fatura Hubla com <code>original_invoice_id</code> vazio, 1ª parcela (<code>smart_installment_current</code> nula ou 1), sem reembolso e <code>invoice_type = 'Compra'</code> (renovação de assinatura não é venda nova). Tudo o mais é <b>parcela</b>: receita real, mas não negócio novo.<br>
           <b>Receita</b> = <code>net_value</code> (líquida). Ticket médio = receita ÷ faturas do filtro.<br>
           <b>Categoria de produto</b>: derivada do nome (DIAMANTE → Upsell · ELITE → Mentoria Elite · PlayPassei / Sou Questões / Pós-graduação → Recorrente · resto → Outros) e materializada por <code>product_hubla_id</code> na tabela de configuração <code>comercial_produto_categoria</code>, editável. Produtos novos entram como "não validados" até alguém confirmar.<br>
-          <b>Dias</b> sempre em calendário de Manaus (−04). Comparativos YoY/MoM usam o mesmo recorte de dias (ex.: 01–16/09/2026 × 01–16/09/2025).
+          <b>Dias</b> sempre em calendário de Manaus (−04). Comparativos YoY/MoM usam o mesmo recorte de dias (ex.: 01–16/09/2026 × 01–16/09/2025).<br>
+          <b>Inscrito</b> = lead criado no período, excluindo importações (<code>first_origin like 'import%'</code>). <b>Concurso do lead</b> = <code>lead_interests</code> ∪ <code>webinar_events</code>. <b>Ensino superior</b> = pesquisa → eventos de campanha → cadastro; conta "superior completo" e "pós" (cursando fica fora).<br>
+          <b>Ação de entrada (1.2)</b>, ordem excludente: Webinário → Estude Comigo → Lançamento → Direct Response (a palavra VSL) → Venda Direta (tráfego pago sem VSL) → Site direto → Não mapeado.<br>
+          <b>Engajado</b> = score &gt; 0 OU pesquisa OU entrou em grupo OU webinário (assistiu/clicou) OU ≥2 mensagens do lead na Anne. <b>Ativo 7d</b> = mensagem do lead na Anne (fora de dormant/opted_out), entrada/checkout de webinário ou entrada em grupo nos últimos 7 dias. <b>Matriculado</b> = venda nova paga (lead_id ou e-mail) ou pedido Elite pago.<br>
+          <b>Canal de venda (5)</b> = atribuição da Anne (<code>sales.attribution</code>) quando existe; senão o código de <code>utm_term</code> desta configuração. <b>Quem assumiu (9C)</b> = só <code>escalations.claimed_by</code>. <b>CAC/ROAS (11)</b> = gasto Meta total ÷ vendas do filtro com placement Meta no lead — piso, não valor real.
         </div>
       </section>
     </div>
@@ -456,7 +476,6 @@
     try { renderComercial(); } catch(e){ $("kpis-comercial").innerHTML = `<p class="note crit">time comercial indisponível: ${esc(e.message)}</p>`; console.error(e); }
     try { renderFinanceiro(); } catch(e){ $("cards-s11").innerHTML = `<p class="note crit">financeiro indisponível: ${esc(e.message)}</p>`; console.error(e); }
     try { renderMetas(); } catch(e){ $("metas-receita").innerHTML = `<p class="note">metas indisponíveis: ${esc(e.message)}</p>`; }
-    renderPendentes();
   }
 
   function renderFiltros(){
@@ -967,7 +986,7 @@
   async function salvarMeta(chave, valor){
     let v = parseFloat(valor); if (!isFinite(v) || v < 0) v = 0;
     const mes = RAW.filtros.ini.slice(0,8) + "01";
-    let por = ""; try { por = localStorage.getItem("com_quem") || ""; if (!por){ por = prompt("Seu nome (fica registrado em quem alterou a meta):") || ""; localStorage.setItem("com_quem", por); } } catch(e){}
+    const por = quem();
     try{
       const r = await fetch(API + "?k=" + encodeURIComponent(K) + "&resource=metas", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({mes, chave, valor:v, por})});
       const d = await r.json(); if (d.error) throw new Error(d.error);
@@ -975,11 +994,45 @@
     }catch(e){ alert("Não foi possível salvar a meta: " + e.message); }
   }
 
-  function renderPendentes(){
-    const bl = {
-    };
-    for (const k in bl) if ($("pend-" + k)) $("pend-" + k).innerHTML = `<b>Em construção</b> — blocos que entram nesta tela (todos os do protótipo):<ul style="margin:6px 0 0 18px">${bl[k].map(x => `<li>${x}</li>`).join("")}</ul>`;
+
+
+
+  /* ================= FASE 6 — CONFIGURAÇÃO ================= */
+  let CFG = null;
+  const quem = () => { let por = ""; try { por = localStorage.getItem("com_quem") || ""; if (!por){ por = prompt("Seu nome (fica registrado em quem alterou):") || ""; localStorage.setItem("com_quem", por); } } catch(e){} return por; };
+  async function cfgFetch(body){
+    const r = await fetch(API + "?k=" + encodeURIComponent(K) + "&resource=config", body ? {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body)} : {});
+    const d = await r.json(); if (d.error) throw new Error(d.error); CFG = d; renderCfg(); return d;
   }
+  async function cfgSave(body){ try { body.por = quem(); await cfgFetch(body); } catch(e){ alert("Não foi possível salvar: " + e.message); } }
+  const CATS_OPT = ["elite", "upsell", "recorrente", "outros"], TIPOS_OPT = ["vendedor", "cs", "ia", "marketing", "disparo", "site"];
+  function renderCfg(){
+    if (!CFG) return;
+    const q = ($("cfg-prod-q").value || "").toLowerCase(), nv = $("cfg-prod-nv").checked;
+    const contests = CFG.contests || [];
+    const prods = CFG.produtos.filter(pr => (!q || (pr.product_name || "").toLowerCase().includes(q) || pr.product_hubla_id.toLowerCase().includes(q)) && (!nv || !pr.validado));
+    $("cfg-prod-n").textContent = `${prods.length} de ${CFG.produtos.length} produtos · ${CFG.produtos.filter(pr => !pr.validado).length} não validados`;
+    $("cfg-prod-sub").textContent = "comercial_produto_categoria · " + CFG.produtos.length + " produtos";
+    const selC = (pr) => `<select data-prod="${esc(pr.product_hubla_id)}" data-f="categoria" style="font-family:inherit;font-size:12px;border:1px solid var(--border);border-radius:6px;padding:3px 5px;background:var(--surface);color:var(--ink)">${CATS_OPT.map(c => `<option value="${c}"${pr.categoria === c ? " selected" : ""}>${c}</option>`).join("")}</select>`;
+    const selK = (pr) => `<select data-prod="${esc(pr.product_hubla_id)}" data-f="contest_code" style="font-family:inherit;font-size:12px;border:1px solid var(--border);border-radius:6px;padding:3px 5px;background:var(--surface);color:var(--ink);max-width:180px"><option value="">— sem concurso —</option>${contests.map(c => `<option value="${esc(c.code)}"${pr.contest_code === c.code ? " selected" : ""}>${esc(cLabel(c.code))}</option>`).join("")}</select>`;
+    $("cfg-prod").innerHTML = `<table><thead><tr><th class="rowlabel">Produto</th><th>ID Hubla</th><th>Categoria</th><th>Concurso</th><th>Validado</th><th>Origem</th></tr></thead><tbody>` +
+      prods.slice(0, 300).map(pr => `<tr><td class="rowlabel">${esc(pr.product_name)}</td><td class="mono" style="font-size:11px">${esc(pr.product_hubla_id)}</td><td>${selC(pr)}</td><td>${selK(pr)}</td><td><input type="checkbox" data-prod="${esc(pr.product_hubla_id)}" data-f="validado"${pr.validado ? " checked" : ""}></td><td style="font-size:11px" class="muted">${esc(pr.origem)}</td></tr>`).join("") + `</tbody></table>` + (prods.length > 300 ? `<p class="note">mostrando 300 — refine o filtro</p>` : "");
+    $("cfg-prod").querySelectorAll("[data-prod]").forEach(el => el.addEventListener("change", () => {
+      const pr = CFG.produtos.find(x => x.product_hubla_id === el.dataset.prod); if (!pr) return;
+      const row = el.closest("tr"); const get = f => row.querySelector(`[data-f="${f}"]`);
+      cfgSave({tipo:"produto", product_hubla_id: pr.product_hubla_id, categoria: get("categoria").value, contest_code: get("contest_code").value || null, validado: get("validado").checked});
+    }));
+    $("cfg-cod").innerHTML = `<table><thead><tr><th class="rowlabel">Código (utm_term)</th><th>Nome</th><th>Tipo</th><th>Validado</th></tr></thead><tbody>` +
+      CFG.codigos.map(c => `<tr><td class="rowlabel mono">${esc(c.codigo)}</td><td><input data-cod="${esc(c.codigo)}" data-f="nome" value="${esc(c.nome || "")}" placeholder="nome" style="font-family:inherit;font-size:12px;border:1px solid var(--border);border-radius:6px;padding:3px 6px;background:var(--surface);color:var(--ink);width:160px"></td><td><select data-cod="${esc(c.codigo)}" data-f="tipo" style="font-family:inherit;font-size:12px;border:1px solid var(--border);border-radius:6px;padding:3px 5px;background:var(--surface);color:var(--ink)">${TIPOS_OPT.map(t => `<option value="${t}"${c.tipo === t ? " selected" : ""}>${t}</option>`).join("")}</select></td><td><input type="checkbox" data-cod="${esc(c.codigo)}" data-f="validado"${c.validado ? " checked" : ""}></td></tr>`).join("") + `</tbody></table>`;
+    $("cfg-cod").querySelectorAll("[data-cod]").forEach(el => el.addEventListener("change", () => {
+      const row = el.closest("tr"); const get = f => row.querySelector(`[data-f="${f}"]`);
+      cfgSave({tipo:"codigo", codigo: el.dataset.cod, nome: get("nome").value, tipo_codigo: get("tipo").value, validado: get("validado").checked});
+    }));
+  }
+  $("cfg-prod-q").addEventListener("input", renderCfg); $("cfg-prod-nv").addEventListener("change", renderCfg);
+  $("cfg-cod-add").onclick = () => { const c = ($("cfg-cod-novo").value || "").trim().toLowerCase(); if (!c) return; cfgSave({tipo:"codigo", codigo: c, tipo_codigo: $("cfg-cod-tipo").value, validado: true}); $("cfg-cod-novo").value = ""; };
+  let cfgLoaded = false;
+  function ensureCfg(){ if (!cfgLoaded && K){ cfgLoaded = true; cfgFetch().catch(e => { $("cfg-prod").innerHTML = `<p class="note crit">configuração indisponível: ${esc(e.message)}</p>`; cfgLoaded = false; }); } }
 
   /* ================= NAV / EVENTOS ================= */
   function route(){
@@ -987,6 +1040,7 @@
     const ok = PAGES.some(p => p.id === id) ? id : "visao";
     document.querySelectorAll(".page").forEach(p => p.classList.toggle("on", p.id === "p-" + ok));
     document.querySelectorAll("#nav a").forEach(a => a.classList.toggle("on", a.dataset.id === ok));
+    if (ok === "config") ensureCfg();
     window.scrollTo({top:0});
   }
   $("nav").innerHTML = PAGES.map(p => `<a href="#/${p.id}" data-id="${p.id}"><span class="ic">${p.ic}</span>${p.label}${p.tag ? `<span class="tag">${p.tag}</span>` : ""}</a>`).join("");
