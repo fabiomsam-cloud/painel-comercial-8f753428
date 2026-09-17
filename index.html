@@ -129,6 +129,7 @@
     aside .foot{display:none}
     main{padding:12px 14px 60px}
     .topbar{position:static}
+    .grp,.seg{flex-wrap:wrap}
   }
 </style>
 </head>
@@ -414,7 +415,7 @@
   const ultimoDiaMes = s => { const [y,m] = s.split("-").map(Number); return new Date(Date.UTC(y, m, 0)).toISOString().slice(0,10); };
 
   /* ================= ESTADO ================= */
-  let RAW = null;
+  let RAW = null, CFG = null;
   let state = {periodo:"mes", ini:null, fim:null, modo:"total", superior:"0", contest:""};
   try { const s = JSON.parse(localStorage.getItem("com_filtros") || "null"); if (s && s.modo) state = Object.assign(state, s); } catch(e){}
   function saveState(){ try { localStorage.setItem("com_filtros", JSON.stringify(state)); } catch(e){} }
@@ -653,7 +654,7 @@
 
   /* ================= FASE 3 — DEMANDA ================= */
   const CONTEST_LABEL = {TJAM:"TJ-AM", SEDUC_PA:"SEDUC-PA", seduc_amazonas:"SEDUC-AM", MANAUSPREV:"ManausPrev", ses_e_semsa_manaus:"SES/SEMSA Manaus", PRF:"PRF", PCAM:"Polícia Civil AM", policia_federal:"Polícia Federal", PCIVIL:"Polícias Civis (bucket genérico)", INSS:"INSS", SEMED:"SEMED", PMAM:"PM-AM", ministerio_publico_do_amazonas:"MP-AM", CBMAM:"CBM-AM", TCE_AM:"TCE-AM", SEFAZ_AM:"SEFAZ-AM", DETRAN_AM:"DETRAN-AM", ALEAM:"ALEAM", CMM:"CMM", carreiras_tribunais:"Carreiras Tribunais", GUARDA_MANAUS:"Guarda Municipal", PCPA:"PC-PA", PLAYPASSEI:"Play Passei"};
-  const cLabel = c => CONTEST_LABEL[c] || ((RAW.contests || []).find(x => x.code === c) || {}).name || c;
+  const cLabel = c => CONTEST_LABEL[c] || (((RAW && RAW.contests) || (CFG && CFG.contests) || []).find(x => x.code === c) || {}).name || c;
   const ESC_LABEL = {superior_completo:"Superior completo", pos:"Pós-graduação", superior_cursando:"Superior cursando", medio:"Ensino médio", fundamental:"Fundamental", outro:"Outro"};
   const ACOES = [["webinario","Webinário"],["estude_comigo","Estude Comigo"],["venda_direta","Venda Direta"],["site_direto","Site direto (orgânico)"],["direct_response","Direct Response"],["lancamento","Lançamento"],["outro_nao_mapeado","Não mapeado"]];
   const LABELS_11 = [["ORGÂNICO", null], ["ig_delta","Instagram · @deltafabio"],["ig_scv","Instagram · @souconcurseiro"],["playpassei","Instagram/Site · @playpassei"],["yt_scv","YouTube · Sou Concurseiro"],["yt_ef","YouTube · Elite Federal"],["blindado","Site · checkout blindado"],["blog","Site · blog"],["PAGO", null],["pago","Meta Ads (Feed + Stories + Reels)"]];
@@ -998,7 +999,6 @@
 
 
   /* ================= FASE 6 — CONFIGURAÇÃO ================= */
-  let CFG = null;
   const quem = () => { let por = ""; try { por = localStorage.getItem("com_quem") || ""; if (!por){ por = prompt("Seu nome (fica registrado em quem alterou):") || ""; localStorage.setItem("com_quem", por); } } catch(e){} return por; };
   async function cfgFetch(body){
     const r = await fetch(API + "?k=" + encodeURIComponent(K) + "&resource=config", body ? {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body)} : {});
