@@ -1,5 +1,5 @@
 // Painel de Inteligência Comercial — lado Anne (blwbbdcwdcwitsnskplk). Mesmo token ?k= da edge dashboard-comercial.
-// Devolve: vendedores ativos, sales do período (seção 5), contatos dos leads do período (seções 2/3).
+// Devolve: vendedores ativos, sales do período (seção 5), contatos dos leads do período (seções 2/3), bloco comercial (9, ref. B, 11).
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const TOKEN = "com-sou-byMernuvTjwl28hb";
@@ -24,7 +24,7 @@ Deno.serve(async (req: Request) => {
     // PostgREST corta em 1000 linhas por requisição — paginar
     // deno-lint-ignore no-explicit-any
     const fetchAll = async (build: (a: number, b: number) => any) => { const out: unknown[] = []; for (let f = 0; f < 50000; f += 1000) { const { data, error } = await build(f, f + 999); if (error) throw new Error(error.message); out.push(...(data ?? [])); if (!data || data.length < 1000) break; } return out; };
-    const [conv, vend, sales, contatos] = await Promise.all([
+    const [conv, vend, sales, contatos, comercial] = await Promise.all([
       sb.from("conversations").select("status", { count: "exact", head: true }).eq("status", "humano_comercial"),
       sb.from("vendedores").select("id, nome, tipo, ativo").eq("ativo", true),
       // atribuição oficial da Anne (seção 5): quando existe linha em sales, ela vence o código do utm_term
@@ -32,10 +32,13 @@ Deno.serve(async (req: Request) => {
         .gte("paid_at", tIni).lte("paid_at", tFim).range(0, 4999),
       // contatos ligados aos leads do período (chave lead_id; phone_norm só para fallback no servidor) + sinais de conversa real
       okYmd(ini) && okYmd(fim) ? fetchAll((a, b) => sb.rpc("fn_comercial_anne_contatos", { p_ini: ini, p_fim: fim }).range(a, b)) : Promise.resolve([]),
+      // seções 9A/9B/9C, motivos de perda e disparos (jsonb único)
+      okYmd(ini) && okYmd(fim) ? sb.rpc("fn_comercial_anne_comercial", { p_ini: ini, p_fim: fim }) : Promise.resolve({ data: null, error: null }),
     ]);
+    if (comercial.error) throw new Error(comercial.error.message);
     if (vend.error) throw new Error(vend.error.message);
     if (sales.error) throw new Error(sales.error.message);
     return json({ generated_at: new Date().toISOString(), janela: { ini: tIni, fim: tFim },
-      humano_comercial: conv.count ?? null, vendedores: vend.data ?? [], sales: sales.data ?? [], contatos });
+      humano_comercial: conv.count ?? null, vendedores: vend.data ?? [], sales: sales.data ?? [], contatos, comercial: comercial.data ?? null });
   } catch (e) { return json({ error: String(e) }, 500); }
 });

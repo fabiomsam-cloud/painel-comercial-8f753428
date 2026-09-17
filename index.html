@@ -297,15 +297,37 @@
 
     <!-- ===== COMERCIAL ===== -->
     <div class="page" id="p-comercial">
-      <div class="page-head"><h2>Time comercial</h2><p>Produtividade do time humano (9A), leads da Anne fora do pipeline (9B), quem assume/engaja/converte (9C) e motivos de perda (ref. B).</p></div>
+      <div class="page-head"><h2>Time comercial</h2><p>Produtividade do time humano (9A), leads da Anne fora do pipeline (9B), quem assume/engaja/converte (9C) e motivos de perda (ref. B). Fonte: anne-vendedora (vendedores, lead_assignments, atividades_comercial, escalations, conversations, messages).</p></div>
       <div class="kpi-row" id="kpis-comercial"></div>
-      <div class="pending-card" id="pend-comercial"></div>
+      <section id="s9">
+        <div class="section-head"><div><span class="section-num">09</span> <h2>Análise comercial — quem assume, engaja e converte</h2></div><span class="section-sub" id="sub-s9"></span></div>
+        <div class="grid-2">
+          <div class="card"><h3>A) Produtividade do time comercial humano</h3><div class="tablewrap" style="margin-top:10px" id="tab-s9a"></div><p class="note" style="margin-top:10px" id="nota-s9a"></p></div>
+          <div class="card"><div class="finding crit" id="finding-s9b"></div><div class="tablewrap" style="margin-top:12px" id="tab-s9b"></div><p class="note" style="margin-top:10px">B) Conversas com <b>≥2 mensagens do próprio lead</b> e mensagem do lead dentro do período, que nunca tiveram posse no Comercial Humano (<code>lead_assignments</code>). "6+" e "10+" contam mensagens do lead em toda a conversa.</p></div>
+        </div>
+        <div class="card"><h3>C) Quem assume, engaja e converte como humano</h3>
+          <p class="note" style="margin-top:8px">O dado existe, mas não onde parece: <code>conversations.current_agent_slug</code> guarda só o agente de IA do funil, nunca uma pessoa — mesmo quando o status vira <code>human</code>/<code>humano_comercial</code>. <code>messages.agent_slug</code> vem sempre nulo para mensagens humanas. Quem registra "quem assumiu" é <code>escalations.claimed_by</code> (e-mail de quem reivindica a conversa escalada pela Anne).</p>
+          <div class="tablewrap" style="margin-top:12px" id="tab-s9c"></div>
+          <div class="finding crit" style="margin-top:12px" id="finding-s9c"></div></div>
+      </section>
+      <section id="s-perda">
+        <div class="section-head"><div><span class="section-num">ref. B</span> <h2>Motivos de perda — pipeline comercial</h2></div><span class="section-sub">lead_assignments.motivo_perda · posses devolvidas/expiradas encerradas no período</span></div>
+        <div class="grid-2">
+          <div class="card"><div style="display:flex;flex-direction:column;gap:8px" id="bar-perda"></div></div>
+          <div class="card"><div class="finding" id="finding-perda"></div><p class="note" style="margin-top:12px">"Outro" costuma ser <b>gente que já era aluna</b> ("JÁ É ALUNO", "JÁ SE MATRICULOU") — erro de classificação no CRM, não perda de venda real. Corrigir isso elevaria a taxa real de conversão do corte. Para ver os dois cortes de agosto e setembro juntos, use o período personalizado.</p></div>
+        </div>
+      </section>
     </div>
 
     <!-- ===== FINANCEIRO ===== -->
     <div class="page" id="p-financeiro">
-      <div class="page-head"><h2>Financeiro</h2><p>Gasto Meta Ads, CAC (piso), ROAS, CPL e resultado dos disparos (11).</p></div>
-      <div class="pending-card" id="pend-financeiro"></div>
+      <div class="page-head"><h2>Financeiro</h2><p>Gasto Meta Ads, CAC (piso), ROAS, CPL e resultado dos disparos (11). Meta = <code>meta_ads_insights</code> diário (todas as contas); vendas atribuíveis = faturas do filtro cujo lead entrou por placement Meta.</p></div>
+      <section id="s11">
+        <div class="section-head"><div><span class="section-num">11</span> <h2>Análise financeira por canal — CAC / ROI / disparos</h2></div><span class="section-sub">meta_ads_insights + hubla_invoices + anne-vendedora.vw_broadcast_stats · <span class="js-modo"></span></span></div>
+        <div class="grid-3" id="cards-s11"></div>
+        <div class="card"><div class="finding crit" id="finding-s11"></div><div class="tablewrap" style="margin-top:12px" id="tab-s11-contas"></div></div>
+        <div class="card"><h3>Disparos (broadcast)</h3><div class="grid-3" style="margin-top:10px" id="cards-disparos"></div><p class="note" style="margin-top:12px" id="nota-disparos"></p><div class="tablewrap" style="margin-top:10px" id="tab-disparos"></div></div>
+      </section>
     </div>
 
     <!-- ===== CONFIG ===== -->
@@ -342,8 +364,8 @@
     {id:"demanda", label:"Demanda", ic:"📥"},
     {id:"engajamento", label:"Engajamento", ic:"🔥"},
     {id:"receita", label:"Receita", ic:"💰"},
-    {id:"comercial", label:"Time comercial", ic:"☎️", tag:"fase 5"},
-    {id:"financeiro", label:"Financeiro", ic:"📊", tag:"fase 5"},
+    {id:"comercial", label:"Time comercial", ic:"☎️"},
+    {id:"financeiro", label:"Financeiro", ic:"📊"},
     {id:"config", label:"Configuração", ic:"⚙️"},
   ];
   const CATS = [["elite","Mentoria Elite"],["upsell","Upsell (Elite Diamante)"],["recorrente","Recorrente"]];
@@ -431,7 +453,8 @@
     for (const [fn, id] of [[renderKpisEng, "kpis-eng"], [renderS2, "tab-s2a"], [renderS3, "tab-s3"], [renderEstrela, "bar-estrela"], [renderKpisDemanda, "kpis-demanda"], [renderS11, "tab-s11"], [renderS12, "tab-s12"], [renderS13, "tab-s13"], [renderS4, "tab-s4"], [renderS5, "tab-s5"], [renderS6, "tab-s6"], [renderS7B, "tab-s7b"], [renderS8, "tab-s8"], [renderS10, "cards-s10"]]){
       try { fn(); } catch(e){ $(id).innerHTML = `<p class="note crit">seção indisponível: ${esc(e.message)}</p>`; console.error(fn.name, e); }
     }
-    try { renderComercial(); } catch(e){ $("kpis-comercial").innerHTML = ""; }
+    try { renderComercial(); } catch(e){ $("kpis-comercial").innerHTML = `<p class="note crit">time comercial indisponível: ${esc(e.message)}</p>`; console.error(e); }
+    try { renderFinanceiro(); } catch(e){ $("cards-s11").innerHTML = `<p class="note crit">financeiro indisponível: ${esc(e.message)}</p>`; console.error(e); }
     try { renderMetas(); } catch(e){ $("metas-receita").innerHTML = `<p class="note">metas indisponíveis: ${esc(e.message)}</p>`; }
     renderPendentes();
   }
@@ -865,13 +888,69 @@
       (c90 && (c90.top || []).length ? tabela("s10_cupons_90d", ["Cupom (90 dias)", "Vendas", "Desconto total"], c90.top.map(t => [t.coupon, t.n, {html:fmtR2(t.desconto), raw:t.desconto}])) : "");
   }
 
+  /* ================= FASE 5 — TIME COMERCIAL + FINANCEIRO ================= */
+  const anneCom = () => (RAW.anne && RAW.anne.ok && RAW.anne.comercial) || null;
+  const MOTIVO_LABEL = {expirado_sem_resultado:"Expirou sem resultado", expirado_sem_trabalho:"Expirou sem trabalhar", outro:"Outro (ver nota)", sem_contato:"Sem contato (não atendeu)", sem_dinheiro_agora:"Sem dinheiro agora", sem_interesse:"Sem interesse", preco:"Preço", ja_aluno:"Já é aluno"};
+  const STATUS_LABEL = {ia:"ia (ainda em atendimento)", dormant:"dormant (esfriou sem escalar)", human:"human (humano não-comercial)", humano_comercial:"humano_comercial", opted_out:"opted_out", won:"won (matriculado)", paused:"paused"};
   function renderComercial(){
-    const a = RAW.anne || {};
-    if (!a.ok){ $("kpis-comercial").innerHTML = ""; return; }
-    const vend = (a.vendedores || []).filter(v => v.tipo === "closer").map(v => v.nome).join(", ");
+    const C = anneCom(); const J = RAW.janelas.atual;
+    if (!C){ $("kpis-comercial").innerHTML = `<div class="finding crit">Anne indisponível nesta carga${RAW.anne && RAW.anne.error ? ": " + esc(RAW.anne.error) : ""} — sem dados do time comercial.</div>`; return; }
+    $("sub-s9").textContent = `anne-vendedora · ${dm(J.ini)}–${dm(J.fim)}`;
+    const vs = (C.vendedores || []).filter(v => v.ativo !== false);
+    const closers = vs.filter(v => v.tipo === "closer");
+    const tot = k => vs.reduce((a, v) => a + (Number(v[k]) || 0), 0);
     $("kpis-comercial").innerHTML = `
-      <div class="kpi"><div class="l">Conversas entregues ao time humano (agora)</div><div class="v num">${fmtN(a.humano_comercial)}</div><div class="s muted">status <code>humano_comercial</code> na Anne</div></div>
-      <div class="kpi"><div class="l">Closers ativos</div><div class="v num">${(a.vendedores || []).filter(v => v.tipo === "closer").length}</div><div class="s muted">${esc(vend)}</div></div>`;
+      <div class="kpi"><div class="l">Conversas entregues ao time (agora)</div><div class="v num">${fmtN(C.humano_comercial_agora)}</div><div class="s muted">status <code>humano_comercial</code></div></div>
+      <div class="kpi"><div class="l">Leads recebidos no período</div><div class="v num">${fmtN(tot("recebidos"))}</div><div class="s muted">${closers.length} closers · ${fmtN(tot("ligacoes"))} ligações registradas</div></div>
+      <div class="kpi"><div class="l">Matriculados pelo time</div><div class="v num ${tot("matriculados") ? "good" : ""}">${fmtN(tot("matriculados"))}</div><div class="s muted">${fmtR(tot("venda_valor"))} · ${pctTxt(tot("matriculados"), tot("recebidos"))} dos recebidos</div></div>
+      <div class="kpi"><div class="l">Escalações sem responsável</div><div class="v num ${C.escalacoes_sem_claim / Math.max(C.escalacoes_total, 1) > 0.3 ? "crit" : ""}">${pctTxt(C.escalacoes_sem_claim, C.escalacoes_total)}</div><div class="s muted">${fmtN(C.escalacoes_sem_claim)} de ${fmtN(C.escalacoes_total)} escalações do período</div></div>`;
+    // 9A
+    const rows = vs.map(v => [v.nome + (v.tipo !== "closer" ? " (" + v.tipo + ")" : ""), {html: Number(v.ligacoes) ? fmtN(v.ligacoes) : "<span class='crit'>0</span>", raw:v.ligacoes}, v.whatsapp, v.recebidos, v.devolvidos, v.expirados, {html: Number(v.matriculados) ? `<span class="good">${fmtN(v.matriculados)} (${fmtR(v.venda_valor)})</span>` : "<span class='muted'>0</span>", raw:v.matriculados}]);
+    $("tab-s9a").innerHTML = tabela("s9a_produtividade", ["Vendedor", "Ligações", "Toques WhatsApp", "Leads recebidos", "Devolvidos", "Expirados", "Matriculado"], rows,
+      {total:[{html:"TOTAL", raw:"TOTAL"}, {html:fmtN(tot("ligacoes")), raw:tot("ligacoes")}, {html:fmtN(tot("whatsapp")), raw:tot("whatsapp")}, {html:fmtN(tot("recebidos")), raw:tot("recebidos")}, {html:fmtN(tot("devolvidos")), raw:tot("devolvidos")}, {html:fmtN(tot("expirados")), raw:tot("expirados")}, {html:fmtN(tot("matriculados")), raw:tot("matriculados")}]});
+    const zero = closers.filter(v => Number(v.recebidos) > 0 && Number(v.ligacoes) === 0).map(v => v.nome);
+    $("nota-s9a").innerHTML = `<code>atividades_comercial</code> só registra ligação (atendida / não atendida / agendada) e notas — <b>não captura toque por WhatsApp</b> (coluna zerada), então a produtividade pode estar subestimada se atendem por lá sem log. Coorte = leads recebidos no período (<code>assigned_at</code>).` + (zero.length ? ` <b class="crit">${zero.join(", ")} tem 0 ligações registradas para leads recebidos</b> — confirmar se é canal de contato diferente ou de fato inatividade.` : "");
+    // 9B
+    const fp = C.fora_pipeline || []; const byS = {}; for (const f of fp) byS[f.status] = f;
+    const dormant = byS.dormant || {convs:0, m6:0, m10:0}, ia = byS.ia || {convs:0, m6:0, m10:0};
+    $("finding-s9b").innerHTML = `<b>${fmtN(dormant.convs)} conversas da Anne "esfriaram" sem nunca chegar ao time comercial</b> — tiveram troca real de mensagens no período (lead respondeu, não só automação) mas o status caiu para <code>dormant</code> sem escalar. Dessas, <b>${fmtN(dormant.m6)} tiveram 6+ mensagens do lead</b> — interesse desperdiçado. Existem mais ${fmtN(ia.convs)} conversas ainda ativas com a IA (<code>status='ia'</code>) que não são necessariamente perdidas; o bloco <code>dormant</code> é onde a ação é mais clara: reengajar ou passar para o humano antes de esfriar de vez.`;
+    $("tab-s9b").innerHTML = tabela("s9b_fora_pipeline", ["Status (fora do pipeline)", "Qtd", "6+ msgs", "10+ msgs"], fp.map(f => [{html: f.status === "dormant" ? `<span class="crit">${STATUS_LABEL[f.status] || f.status}</span>` : (STATUS_LABEL[f.status] || f.status), raw:f.status}, {html: f.status === "dormant" ? `<b class="crit">${fmtN(f.convs)}</b>` : fmtN(f.convs), raw:f.convs}, f.m6, f.m10]));
+    // 9C
+    const es = C.escalacoes || [];
+    const rowsC = es.map(e => [e.claimed_by.split("@")[0], {html: `${fmtN(e.assumiu)} (${fmtN(e.conversas)} conversas)`, raw:e.assumiu}, e.engajou, {html: Number(e.converteu) ? `<span class="good">${fmtN(e.converteu)}</span>` : "<span class='muted'>0</span>", raw:e.converteu}]);
+    rowsC.push([{html:"<span class='crit'>Sem claim registrado</span>", raw:"sem_claim"}, {html:`<span class="crit">${fmtN(C.escalacoes_sem_claim)}</span>`, raw:C.escalacoes_sem_claim}, {html:"<span class='muted'>não apurado</span>", raw:""}, {html:"<span class='muted'>não apurado</span>", raw:""}]);
+    $("tab-s9c").innerHTML = tabela("s9c_quem_assume", ["Quem assumiu", "Assumiu", "Engajou (lead respondeu)", "Converteu"], rowsC);
+    const emails = new Set(vs.map(v => (v.email || "").toLowerCase())); const fora = es.filter(e => !emails.has((e.claimed_by || "").toLowerCase())).map(e => e.claimed_by.split("@")[0]);
+    $("finding-s9c").innerHTML = `<b>${pctTxt(C.escalacoes_sem_claim, C.escalacoes_total)} das escalações do período (${fmtN(C.escalacoes_sem_claim)} de ${fmtN(C.escalacoes_total)}) foram resolvidas sem ninguém registrado como responsável</b> — esse é o ponto cego real: para essas só dá para saber que "virou humano", não quem. ` + (fora.length ? `<b>${fora.join(", ")} não está cadastrado(a) em <code>vendedores</code></b> — confirmar o papel operacional antes de tratar como produtividade de vendedor formal. ` : "") + `"Engajou"/"converteu" não exigem que quem assumiu seja quem fechou a venda — esse vínculo não existe nos dados.`;
+    // ref B
+    const mp = (C.motivos_perda || []).filter(m => m.motivo); const totP = mp.reduce((a, m) => a + Number(m.n), 0); const mx = Math.max(1, ...mp.map(m => Number(m.n)));
+    $("bar-perda").innerHTML = mp.length ? mp.map(m => `<div style="display:grid;grid-template-columns:170px 1fr 60px;align-items:center;gap:8px"><span style="font-size:12px;color:var(--ink-2)">${esc(MOTIVO_LABEL[m.motivo] || m.motivo)}</span><div style="background:var(--surface-2);border-radius:5px;height:9px;overflow:hidden"><div style="height:100%;width:${(Number(m.n) / mx * 100).toFixed(0)}%;background:${/expirad/.test(m.motivo) ? "var(--critical)" : (m.motivo === "outro" ? "var(--accent)" : "var(--warning)")}"></div></div><span class="num" style="font-size:11.5px;text-align:right">${fmtN(Number(m.n))}</span></div>`).join("") : `<p class="note">Nenhuma posse encerrada com motivo no período.</p>`;
+    const exp = mp.filter(m => /expirad/.test(m.motivo)).reduce((a, m) => a + Number(m.n), 0), objecoes = mp.filter(m => !/expirad|outro/.test(m.motivo)).sort((a, b) => b.n - a.n)[0];
+    $("finding-perda").innerHTML = totP ? (exp ? `<b>${pctTxt(exp, totP)} das perdas (${fmtN(exp)} de ${fmtN(totP)}) são "expirou" — não é objeção do lead, é o prazo do corte (14 dias de posse) acabando antes de alguém trabalhar o lead.</b> ${objecoes ? "Maior que qualquer objeção real (" + (MOTIVO_LABEL[objecoes.motivo] || objecoes.motivo) + " = " + fmtN(objecoes.n) + "). " : ""}O funil de perda hoje conta mais sobre capacidade do time do que sobre qualidade do lead.` : `${fmtN(totP)} perdas no período; nenhuma por expiração. Maior motivo: <b>${objecoes ? (MOTIVO_LABEL[objecoes.motivo] || objecoes.motivo) + " (" + fmtN(objecoes.n) + ")" : "—"}</b>.`) : "Sem perdas registradas no período.";
+  }
+
+  function renderFinanceiro(){
+    const ms = RAW.meta_spend || [], spend = ms.reduce((a, r) => a + (Number(r.spend) || 0), 0), clicks = ms.reduce((a, r) => a + (Number(r.clicks) || 0), 0);
+    const camps = new Set(ms.map(r => r.campaign_id)).size;
+    const rows = rowsModo(RAW.vendas.atual), meta = rows.filter(r => r.placement_meta), metaV = soma(meta);
+    const comLead = rows.filter(r => r.lead_id), semUtm = comLead.filter(r => !r.placement_meta && ["desconhecido", "hubla_checkout"].includes(r.canal_lead));
+    const leadsMeta = RAW.leads.atual.filter(r => r.canal === "meta_ads").length;
+    const cac = meta.length ? spend / meta.length : null, roas = spend ? metaV / spend : null, cpl = leadsMeta ? spend / leadsMeta : null;
+    document.querySelectorAll(".js-modo").forEach(e => e.textContent = MODO_LABEL[state.modo]);
+    const cell = (k, v, cls2) => `<div class="avg-cell" style="border:1px solid var(--border);border-radius:8px"><div class="k">${k}</div><div class="v ${cls2 || ""}">${v}</div></div>`;
+    $("cards-s11").innerHTML = cell("Gasto Meta Ads (todas as contas)", fmtR(spend) + ` <small class="muted">· ${camps} campanhas</small>`) + cell("CAC (Meta Ads, piso)", cac == null ? "—" : fmtR(cac) + " /venda", "") + cell("ROAS (Meta Ads)", roas == null ? "—" : roas.toFixed(2).replace(".", ",") + "×", roas != null ? (roas >= 1 ? "good" : "crit") : "");
+    $("finding-s11").innerHTML = `<b>CAC de ${cac == null ? "—" : fmtR(cac)} é um piso, não o valor real</b> — das ${fmtN(comLead.length)} vendas do filtro com lead vinculado, <b>${fmtN(semUtm.length)} (${pctTxt(semUtm.length, comLead.length)}) não têm origem de tráfego registrada</b> (sem UTM / lead nascido na compra). O cálculo usou só as ${fmtN(meta.length)} vendas com placement Meta claramente identificável (${fmtR2(metaV)} de receita líquida) contra o gasto total de ${fmtR2(spend)} — se houver mais vendas de Meta escondidas no "sem atribuição", o CAC real é menor e o ROAS maior. Métrica alternativa mais fraca: <b>CPL ≈ ${cpl == null ? "—" : fmtR2(cpl)}</b> (${fmtN(leadsMeta)} leads com canal Meta Ads no período; ${fmtN(clicks)} cliques), mas não fecha diretamente com o CAC porque lead e venda podem ser de meses diferentes.`;
+    // por conta
+    const byAcc = {}; for (const r of ms){ const k = r.ad_account_name || "?"; (byAcc[k] = byAcc[k] || {spend:0, clicks:0, c:new Set()}); byAcc[k].spend += Number(r.spend) || 0; byAcc[k].clicks += Number(r.clicks) || 0; byAcc[k].c.add(r.campaign_id); }
+    $("tab-s11-contas").innerHTML = tabela("s11_meta_contas", ["Conta de anúncio", "Campanhas", "Gasto", "Cliques", "Custo/clique"], Object.entries(byAcc).sort((a, b) => b[1].spend - a[1].spend).map(([k, x]) => [k, x.c.size, {html:fmtR2(x.spend), raw:x.spend.toFixed(2)}, x.clicks, {html: x.clicks ? fmtR2(x.spend / x.clicks) : "—", raw: x.clicks ? (x.spend / x.clicks).toFixed(2) : ""}]));
+    // disparos
+    const C = anneCom(); const bc = C ? (C.broadcast || []) : [];
+    const env = bc.reduce((a, b) => a + Number(b.enviados || 0), 0), resp = bc.reduce((a, b) => a + Number(b.respostas || 0), 0);
+    $("cards-disparos").innerHTML = cell("Campanhas no período", fmtN(bc.length)) + cell("Mensagens enviadas", fmtN(env)) + cell("Taxa de resposta", env ? pctTxt(resp, env) + ` <small class="muted">(${fmtN(resp)})</small>` : "—");
+    const top = bc.filter(b => Number(b.enviados) >= 100).map(b => ({...b, tx: Number(b.respostas) / Number(b.enviados)})).sort((a, b) => b.tx - a.tx)[0];
+    const pd = C ? C.pos_disparo : null;
+    $("nota-disparos").innerHTML = (C ? "" : "Anne indisponível nesta carga. ") + (top ? `Destaque: <b>"${esc(top.name)}"</b> (${fmtN(top.enviados)} enviados, ${pctTxt(top.respostas, top.enviados)} de resposta). ` : "") + (pd ? `Cruzando envio com vendas numa janela de até 10 dias, <b>${fmtN(pd.vendas)} vendas</b> ocorreram depois de um disparo (${fmtN(pd.vendas_anne)} com crédito da Anne, ${fmtN(pd.vendas_disparo_attr)} atribuídas ao disparo) — mas isso é <b>correlação temporal, não atribuição causal confirmada</b>. Tratar como sinal de que os disparos "aquecem" a base, não como ROI provado. Custo de referência: R$ 0,43 por mensagem de template (≈ ${fmtR(env * 0.43)} no período).` : "");
+    $("tab-disparos").innerHTML = bc.length ? tabela("s11_disparos", ["Campanha", "Agente", "Status", "Enviadas", "Respostas", "Taxa"], bc.map(b => [b.name, b.agent_slug, b.status, b.enviados, b.respostas, {html: Number(b.enviados) ? pctTxt(b.respostas, b.enviados) : "—", raw: Number(b.enviados) ? (b.respostas / b.enviados * 100).toFixed(2) : ""}])) : "";
   }
 
   function renderMetas(){
@@ -898,8 +977,6 @@
 
   function renderPendentes(){
     const bl = {
-      comercial: ["9A Produtividade do time humano (ligações, recebidos, devolvidos, matriculados)", "9B Leads da Anne fora do pipeline (ia / dormant / human / opted_out × 6+ e 10+ msgs)", "9C Quem assume, engaja e converte (escalations.claimed_by)", "Ref. B Motivos de perda"],
-      financeiro: ["11 Gasto Meta Ads, CAC (piso), ROAS, CPL — com a ressalva de cobertura de UTM", "11 Disparos: campanhas, enviadas, taxa de resposta, vendas até 10 dias após (correlação, não causa)"],
     };
     for (const k in bl) if ($("pend-" + k)) $("pend-" + k).innerHTML = `<b>Em construção</b> — blocos que entram nesta tela (todos os do protótipo):<ul style="margin:6px 0 0 18px">${bl[k].map(x => `<li>${x}</li>`).join("")}</ul>`;
   }
